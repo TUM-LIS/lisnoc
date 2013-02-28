@@ -54,7 +54,8 @@ module lisnoc_mp_simple(/*AUTOARG*/
    parameter noc_type_width = 2;
    localparam noc_flit_width = noc_data_width + noc_type_width;
 
-   parameter size_width = 4;
+   parameter  fifo_depth = 16;
+   localparam size_width = clog2(fifo_depth+1);
    
    input clk;
    input rst;
@@ -170,7 +171,9 @@ module lisnoc_mp_simple(/*AUTOARG*/
            if (bus_en && !bus_we) begin
               in_data = size_in;
               in_ack = 1'b1;
-              nxt_state_in = IN_FLIT;
+              if (size_in!=0) begin
+                 nxt_state_in = IN_FLIT;
+              end
            end else begin
               nxt_state_in = IN_IDLE;
            end
@@ -381,7 +384,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
    
 
    lisnoc_packet_buffer
-     #()
+     #(.fifo_depth(fifo_depth))
    u_packetbuffer_in(// Outputs
                      .in_ready          (noc_in_ready),
                      .out_flit          (in_flit[noc_flit_width-1:0]),
@@ -393,6 +396,15 @@ module lisnoc_mp_simple(/*AUTOARG*/
                      .in_flit           (noc_in_flit[noc_flit_width-1:0]),
                      .in_valid          (noc_in_valid),
                      .out_ready         (in_ready));
+
+   function integer clog2;
+      input integer value;
+      begin
+         value = value-1;
+         for (clog2=0; value>0; clog2=clog2+1)
+           value = value>>1;
+      end
+   endfunction
 
 endmodule // lisnoc_mp_simple
 
