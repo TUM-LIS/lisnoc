@@ -101,13 +101,13 @@ module lisnoc_router_2dgrid( /*AUTOARG*/
     .out_flit ({north_out_flit_o,east_out_flit_o,south_out_flit_o,west_out_flit_o,local_out_flit_o}),
     .out_valid ({north_out_valid_o,east_out_valid_o,south_out_valid_o,west_out_valid_o,local_out_valid_o}),
     .out_ready ({north_out_ready_i,east_out_ready_i,south_out_ready_i,west_out_ready_i,local_out_ready_i}),
-    .in_flit ({north_in_flit_i,east_in_flit_i,sinh_in_flit_i,west_in_flit_i,local_in_flit_i}),
-    .in_valid ({north_in_valid_i,east_in_valid_i,sinh_in_valid_i,west_in_valid_i,local_in_valid_i}),
-    .in_ready ({north_in_ready_o,east_in_ready_o,sinh_in_ready_o,west_in_ready_o,local_in_ready_o}),
+    .in_flit ({north_in_flit_i,east_in_flit_i,south_in_flit_i,west_in_flit_i,local_in_flit_i}),
+    .in_valid ({north_in_valid_i,east_in_valid_i,south_in_valid_i,west_in_valid_i,local_in_valid_i}),
+    .in_ready ({north_in_ready_o,east_in_ready_o,south_in_ready_o,west_in_ready_o,local_in_ready_o}),
     ); */
    lisnoc_router #(.vchannels(vchannels),.input_ports(5),.output_ports(5),.lookup(lookup),.num_dests(num_dests),
    .flit_data_width(flit_data_width), .flit_type_width(flit_type_width), .ph_dest_width(ph_dest_width),.use_prio(use_prio),
-   .ph_prio_width(ph_prio_width))
+   .ph_prio_width(ph_prio_width),.in_fifo_length(in_fifo_length),.out_fifo_length(out_fifo_length))
    u_router(/*AUTOINST*/
               // Outputs
               .out_flit                 ({local_out_flit_o,west_out_flit_o,south_out_flit_o,east_out_flit_o,north_out_flit_o}), // Templated
