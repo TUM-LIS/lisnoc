@@ -78,7 +78,7 @@ module lisnoc_dma_request_table(/*AUTOARG*/
    output [table_entries-1:0]         valid;
    output [table_entries-1:0]         done;
 
-   output                             irq;
+   output [table_entries-1:0] 	      irq;
    
    // The storage of the requests ..
    reg [`DMA_REQUEST_WIDTH-1:0] transfer_request_table[0:table_entries-1];
@@ -136,7 +136,7 @@ module lisnoc_dma_request_table(/*AUTOARG*/
    endgenerate
 
    // The interrupt is set when any request is valid and done
-   assign irq = |(transfer_valid & transfer_done) & generate_interrupt;
+   assign irq = (transfer_valid & transfer_done) & {(table_entries){1'b1}};
    
 endmodule // dma_transfer_table
 
