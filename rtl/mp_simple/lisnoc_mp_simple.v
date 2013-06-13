@@ -165,14 +165,21 @@ module lisnoc_mp_simple(/*AUTOARG*/
       in_ready = 1'b0;
       in_ack = 1'b0;
       in_data = 32'hx;
+      nxt_state_in = state_in;
 
       case(state_in)
         IN_IDLE: begin
            if (bus_en && !bus_we) begin
-              in_data = size_in;
-              in_ack = 1'b1;
-              if (size_in!=0) begin
-                 nxt_state_in = IN_FLIT;
+              if (in_valid) begin
+                 in_data = size_in;
+                 in_ack = 1'b1;
+                 if (size_in!=0) begin
+                    nxt_state_in = IN_FLIT;
+                 end
+              end else begin
+                 in_data = 0;
+                 in_ack = 1'b1;
+                 nxt_state_in = IN_IDLE;
               end
            end else begin
               nxt_state_in = IN_IDLE;
