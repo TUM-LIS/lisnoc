@@ -44,7 +44,7 @@ module lisnoc_packet_buffer(/*AUTOARG*/
    localparam flit_width = data_width+2;
 
    parameter  fifo_depth = 16;
-   localparam size_width = clog2(fifo_depth);
+   localparam size_width = clog2(fifo_depth+1);
    
    localparam READY = 1'b0, BUSY = 1'b1;
    
@@ -87,7 +87,7 @@ module lisnoc_packet_buffer(/*AUTOARG*/
       end
    end
    
-   assign full_packet = |(last_flits & valid_flits);
+   assign full_packet = |(last_flits[fifo_depth-1:0] & valid_flits);
 
    assign pop = out_valid & out_ready;
    assign push = in_valid & in_ready;
@@ -98,14 +98,14 @@ module lisnoc_packet_buffer(/*AUTOARG*/
    assign in_ready = !fifo_write_ptr[fifo_depth];
 
    always @(*) begin : findfirstlast
-      integer i;
-      integer s;
+      reg [size_width-1:0] i;
+      reg [size_width-1:0] s;
       reg    found;
 
       s = 0;
       found = 0;
       
-      for (i=0;i<fifo_depth-1;i=i+1) begin
+      for (i=0;i<fifo_depth;i=i+1) begin
          if (last_flits[i] && !found) begin
             s = i+1;
             found = 1;
