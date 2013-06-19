@@ -7,9 +7,9 @@ import shutil
 
 import matplotlib.pyplot as plt
 
-start=0.02
+start=0.05
 end=0.2
-step=0.02
+step=0.05
 
 vchannels=[1,2,4]
 

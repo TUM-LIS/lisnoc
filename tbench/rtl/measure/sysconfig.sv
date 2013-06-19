@@ -42,9 +42,9 @@ class sysconfig;
    static function void explode(string s,string sep,ref string vec []);
       int offset = 0;
       int i;
-      
+
       for (i=0;i<s.len();i++) begin
-         if (s.getc(i)==sep) begin
+         if (s.getc(i)==sep.getc(0)) begin
             vec = new[vec.size()+1](vec);
             vec[vec.size()-1] = s.substr(offset,i-1);
             offset=i+1;
@@ -55,13 +55,14 @@ class sysconfig;
          vec = new[vec.size()+1](vec);
          vec[vec.size()-1] = s.substr(offset,s.len()-1);
       end
+
    endfunction // explode
 
    static function bit explodefirst(string s,string sep,ref string first,ref string second);
       explodefirst = 0;
 
       for (int i=0;i<s.len();i++) begin
-         if (s.getc(i)==sep) begin
+         if (s.getc(i)==sep.getc(0)) begin
             first = s.substr(0,i-1);
             second = s.substr(i+1,s.len()-1);
             explodefirst=1;
@@ -107,20 +108,25 @@ class sysconfig;
       string t [];
       
       traffic = new [nodes];
-      
+     
       explode(conf,";",t);
 
       for (int i=0;i<t.size();i++) begin
          string id,desc;
          if (explodefirst(t[i],":",id,desc)) begin
             trafficdesc traf = trafficextract(desc);
+            
             if (id=="*") begin
                for (int i=0;i<nodes;i++) begin
                   addTraffic(i,traf);
                end
             end else begin
+               $display("%s\n",id);
+               
                addTraffic(id.atoi(),traf);
             end
+         end else begin
+            $display("invalid: %s\n",t[i]);
          end
       end
       

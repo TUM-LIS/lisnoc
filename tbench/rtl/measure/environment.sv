@@ -40,6 +40,8 @@ class environment #(flit_data_width=32,flit_dest_width=4,vchannels=1,mc_supporte
          trafficdesc td;
          
          netacc[i]  = new(links_out[i],measure);
+         $display("%d %d",i,conf.getTrafficNum(i));
+         
          traffic[i] = new[conf.getTrafficNum(i)];
          for (int t=0;t<conf.getTrafficNum(i);t++) begin
             td = conf.getTraffic(i,t);

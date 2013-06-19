@@ -18,7 +18,7 @@ module measure();
    parameter link_width = 32;
 
    // Number of virtual channels
-   parameter vchannels = 4;
+   parameter vchannels = 1;
 
    // Select the router implementation:
    // 0: unicast, no priorization
@@ -36,12 +36,12 @@ module measure();
    parameter numPackets = 10000;
    
    // Traffic generator configuration
-//   parameter traffic = "*:uniform(0.15)";
+   parameter traffic = "*:uniform(0.15);5:uniform(0.05)";
 //   parameter traffic = "0:uniform(0.01,{1});1:uniform(0.1,{2});2:uniform(0.2,{15})";
 //   parameter traffic = "0:uniform(0.01,{1-2})";
 //   parameter traffic = "5:multicast(0.01,{1-2-3-4-6-7-8-10-11-12},{1-2})";
 //   parameter traffic = "*:uniform(0.01,{*},{0-1});5:multicast(0.15,{1-2-3-4-6-7-8},{2-3})";
-   parameter traffic = "*:uniform(0.01,{*},{0-1});*:multicast(0.01,{*},{2-3})";
+//   parameter traffic = "*:uniform(0.01,{*},{0-1});*:multicast(0.01,{*},{2-3})";
    
 
    // General flit format
