@@ -134,8 +134,8 @@ module lisnoc_dma_initiator_nocresp(/*AUTOARG*/
       wb_stb_o     = 1'b0;
       wb_cyc_o     = 1'b0;
       wb_we_o  = 1'b0;
-      wb_bte_o = 3'b000;
-      wb_cti_o = 2'b00;
+      wb_bte_o = 2'b00;
+      wb_cti_o = 3'b000;
 
       ctrl_done_en = 1'b0;
       ctrl_done_pos = 0;

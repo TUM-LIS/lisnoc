@@ -45,7 +45,7 @@ module lisnoc_dma_wbinterface(/*AUTOARG*/
 //   localparam table_entries_ptrwidth = $clog2(table_entries);
    localparam table_entries_ptrwidth = 2;
 
-   parameter tileid = 0;
+   parameter tileid = 0; // TODO: remove
    
    input clk,rst;
    
@@ -77,20 +77,18 @@ module lisnoc_dma_wbinterface(/*AUTOARG*/
                            wb_if_dat_i[0] };
 
    assign if_write_pos = wb_if_adr_i[table_entries_ptrwidth+4:5]; // ptrwidth MUST be <= 7 (=128 entries)
-   assign if_write_en  = wb_if_cyc_i & wb_if_stb_i & wb_if_we_i & wb_if_adr_i[12];
+   assign if_write_en  = wb_if_cyc_i & wb_if_stb_i & wb_if_we_i;
 
    assign if_valid_pos = wb_if_adr_i[table_entries_ptrwidth+4:5]; // ptrwidth MUST be <= 7 (=128 entries)
-   assign if_valid_en  = wb_if_cyc_i & wb_if_stb_i & wb_if_adr_i[12] & (wb_if_adr_i[4:0] == 5'h14) & wb_if_we_i;
-   assign if_validrd_en  = wb_if_cyc_i & wb_if_stb_i & wb_if_adr_i[12] & (wb_if_adr_i[4:0] == 5'h14) & ~wb_if_we_i;
+   assign if_valid_en  = wb_if_cyc_i & wb_if_stb_i & (wb_if_adr_i[4:0] == 5'h14) & wb_if_we_i;
+   assign if_validrd_en  = wb_if_cyc_i & wb_if_stb_i & (wb_if_adr_i[4:0] == 5'h14) & ~wb_if_we_i;
    assign if_valid_set = wb_if_we_i | (~wb_if_we_i & ~done[if_valid_pos]);
 
    assign wb_if_ack_o = wb_if_cyc_i & wb_if_stb_i;
 
    always @(*) begin
-      if (wb_if_adr_i[12] && (wb_if_adr_i[4:0] == 5'h14)) begin
+      if (wb_if_adr_i[4:0] == 5'h14) begin
          wb_if_dat_o = {31'h0,done[if_valid_pos]};
-      end else begin
-         wb_if_dat_o = tileid;
       end
    end
    

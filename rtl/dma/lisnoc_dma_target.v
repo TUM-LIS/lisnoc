@@ -528,9 +528,13 @@ module lisnoc_dma_target (/*AUTOARG*/
            end else begin //not wb_waiting
               // Signal cycle and strobe. We do bursts, but don't insert
               // wait states, so both of them are always equal.
-              wb_stb_o = 1'b1;
-              wb_cyc_o = 1'b1;
-
+              if ((noc_resp_packet_wcount==noc_resp_packet_wsize) & noc_out_valid & noc_out_ready) begin
+                 wb_stb_o = 1'b0;
+                 wb_cyc_o = 1'b0;
+              end else begin
+                 wb_stb_o = 1'b1;
+                 wb_cyc_o = 1'b1;
+              end
               // TODO: why not generate address from the base address + counter<<2?
 
               if (~data_fifo_ready | (wb_resp_count==resp_wsize)) begin

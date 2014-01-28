@@ -39,6 +39,9 @@ module lisnoc_mesh3x3
    parameter ph_dest_width = 5;
    parameter vchannels = 1;
 
+   parameter in_fifo_length = 4;
+   parameter out_fifo_length = 4;
+
    input clk;
    input rst;
 
