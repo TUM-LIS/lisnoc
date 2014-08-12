@@ -29,7 +29,6 @@
  */
 
 `include "lisnoc_def.vh"
-`timescale 1ns / 1ps
 
 module lisnoc_router_input_route (/*AUTOARG*/
    // Outputs
