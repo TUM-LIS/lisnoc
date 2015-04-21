@@ -31,14 +31,19 @@
 
 /**
  *
- *                   +-> Input path <- packet buffer <-- NoC
+ *                   +-> Input path <- packet buffer <-- Ingress
  *                   |    * raise interrupt (!empty)
  * Bus interface --> +    * read size flits from packet buffer
  *                   |
- *                   +-> Output path -> packet buffer --> NoC 
+ *                   +-> Output path -> packet buffer --> Egress
  *                        * set size
  *                        * write flits to packet buffer
  * 
+ * Ingress <---+----- NoC
+ *             |
+ *       Handle control message
+ *             |
+ *  Egress ----+----> NoC
  */
 
 module lisnoc_mp_simple(/*AUTOARG*/
@@ -54,6 +59,8 @@ module lisnoc_mp_simple(/*AUTOARG*/
    parameter noc_type_width = 2;
    localparam noc_flit_width = noc_data_width + noc_type_width;
 
+   parameter PACKET_CLASS_CONTROL = 3'b111;
+
    parameter  fifo_depth = 16;
    localparam size_width = clog2(fifo_depth+1);
    
@@ -61,13 +68,13 @@ module lisnoc_mp_simple(/*AUTOARG*/
    input rst;
 
    // NoC interface
-   output [noc_flit_width-1:0] noc_out_flit;
-   output                      noc_out_valid;
-   input                       noc_out_ready;
+   output reg [noc_flit_width-1:0] noc_out_flit;
+   output reg 			   noc_out_valid;
+   input 			   noc_out_ready;
 
    input [noc_flit_width-1:0] noc_in_flit;
    input                      noc_in_valid;
-   output                     noc_in_ready;
+   output reg 		      noc_in_ready;
 
    // Bus side (generic)
    input [5:0]                     bus_addr;
@@ -89,6 +96,9 @@ module lisnoc_mp_simple(/*AUTOARG*/
    wire                        in_valid;
    wire [noc_flit_width-1:0]   in_flit;
 
+   reg 			       enabled;
+   reg 			       nxt_enabled;
+
    assign irq = in_valid;
 
    // If the output type width is larger than 2 (e.g. multicast support)
@@ -102,37 +112,64 @@ module lisnoc_mp_simple(/*AUTOARG*/
          assign out_flit = { out_type, bus_data_in };
       end
    endgenerate
-   
-   reg out_ack;
-   reg in_ack;
-   reg status_ack;
 
-   reg [31:0] in_data;
-   reg [31:0] status_data;
-   
-   // Multiplex acks and data
+   reg 	      if_fifo_in_en;
+   reg 	      if_fifo_in_ack;
+   reg [31:0] if_fifo_in_data;
+   reg 	      if_fifo_out_en;
+   reg 	      if_fifo_out_ack;
+
+   /*
+    * +------+---+------------------------+
+    * | 0x0  | R | Read from Ingress FIFO |
+    * +------+---+------------------------+
+    * |      | W | Write to Egress FIFO   |
+    * +------+---+------------------------+
+    * | 0x4  | W | Enable interface       |
+    * +------+---+------------------------+
+    * |      | R | Status                 |
+    * +------+---+------------------------+
+    *
+    */
    always @(*) begin
       bus_ack = 0;
       bus_data_out = 32'hx;
+      nxt_enabled = enabled;
+
+      if_fifo_in_en = 1'b0;
+      if_fifo_out_en = 1'b0;
       
       if (bus_en) begin
-         if (bus_we) begin
-            bus_ack = out_ack;
-         end else begin
-            // 0x10-0x1f are status
-            if (bus_addr[4]) begin
-               bus_ack = status_ack;
-               bus_data_out = status_data;
-            end else begin
-               bus_ack = in_ack;
-               bus_data_out = in_data;
-            end
-         end
+	 if (bus_addr[5:2] == 4'h0) begin
+	    if (!bus_we) begin
+	       if_fifo_in_en = 1'b1;
+	       bus_ack = if_fifo_in_ack;
+	       bus_data_out = if_fifo_in_data;
+	    end else begin
+	       if_fifo_out_en = 1'b1;
+	       bus_ack = if_fifo_out_ack;
+	    end
+	 end else if (bus_addr[5:2] == 4'h1) begin
+	    bus_ack = 1'b1;
+	    if (bus_we) begin
+	       nxt_enabled = 1'b1;
+	    end else begin
+	       bus_data_out = {30'h0, noc_out_valid, in_valid};
+	    end
+	 end
+      end // if (bus_en)
+   end // always @ begin
+
+   always @(posedge clk) begin
+      if (rst) begin
+	 enabled <= 1'b0;
+      end else begin
+	 enabled <= nxt_enabled;
       end
    end
    
    /**
-    * Simple writes to the any address (use 0x0)
+    * Simple writes to 0x0
     *  * Start transfer and set size S
     *  * For S flits: Write flit
     */
@@ -163,22 +200,22 @@ module lisnoc_mp_simple(/*AUTOARG*/
    // Combinational part of input state machine
    always @(*) begin
       in_ready = 1'b0;
-      in_ack = 1'b0;
-      in_data = 32'hx;
+      if_fifo_in_ack = 1'b0;
+      if_fifo_in_data = 32'hx;
       nxt_state_in = state_in;
 
       case(state_in)
         IN_IDLE: begin
-           if (bus_en && !bus_we) begin
+           if (if_fifo_in_en) begin
               if (in_valid) begin
-                 in_data = size_in;
-                 in_ack = 1'b1;
+                 if_fifo_in_data = size_in;
+                 if_fifo_in_ack = 1'b1;
                  if (size_in!=0) begin
                     nxt_state_in = IN_FLIT;
                  end
               end else begin
-                 in_data = 0;
-                 in_ack = 1'b1;
+                 if_fifo_in_data = 0;
+                 if_fifo_in_ack = 1'b1;
                  nxt_state_in = IN_IDLE;
               end
            end else begin
@@ -186,10 +223,10 @@ module lisnoc_mp_simple(/*AUTOARG*/
            end
         end
         IN_FLIT: begin
-           if (bus_en && !bus_we) begin
-              in_data = in_flit[31:0];
+           if (if_fifo_in_en) begin
+              if_fifo_in_data = in_flit[31:0];
               in_ready = 1'b1;
-              in_ack = 1'b1;
+              if_fifo_in_ack = 1'b1;
               if (size_in==1) begin
                  nxt_state_in = IN_IDLE;
               end else begin
@@ -200,7 +237,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
            end
         end // case: IN_FLIT
         default: begin
-           in_data = 32'hx;
+	   nxt_state_in = IN_IDLE;
         end
       endcase
    end   
@@ -210,19 +247,18 @@ module lisnoc_mp_simple(/*AUTOARG*/
       // default values
       out_valid = 1'b0; // no flit
       nxt_size_out = size_out;  // keep size
-      out_ack = 1'b0;   // don't acknowledge
+      if_fifo_out_ack = 1'b0;   // don't acknowledge
       out_type = 2'bxx; // Default is undefined
-      
-      
+
       case(state_out)
         OUT_IDLE: begin
            // Transition from IDLE to FIRST
            // when write on bus, which is the size
-           if (bus_we && bus_en) begin
+           if (if_fifo_out_en) begin
               // Store the written value as size
               nxt_size_out = bus_data_in[size_width-1:0];
               // Acknowledge to the bus
-              out_ack = 1'b1;
+              if_fifo_out_ack = 1'b1;
               nxt_state_out = OUT_FIRST;
            end else begin
               nxt_state_out = OUT_IDLE;
@@ -233,7 +269,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
            // This can be either the only flit (size==1)
            // or a further flits will follow.
            // Forward the flits to the packet buffer.
-           if (bus_we && bus_en) begin
+           if (if_fifo_out_en) begin
               // When the bus writes, the data is statically assigned
               // to out_flit. Set out_valid to signal the flit should
               // be output
@@ -254,7 +290,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
                  nxt_size_out = size_out-1;
                  
                  // Acknowledge to the bus
-                 out_ack = 1'b1;
+                 if_fifo_out_ack = 1'b1;
 
                  if (size_out==1) begin
                     // When this was the only flit, go to IDLE again
@@ -300,7 +336,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
                  nxt_size_out = size_out-1;
                  
                  // Acknowledge to the bus
-                 out_ack = 1'b1;
+                 if_fifo_out_ack = 1'b1;
 
                  if (size_out==1) begin
                     // When this was the last flit, go to IDLE again
@@ -341,37 +377,75 @@ module lisnoc_mp_simple(/*AUTOARG*/
       end
    end
 
-   /**
-    * Read from the following addresses gives status and parameters
-    *  0x10: Output packet buffer empty
-    *  0x14: Output state
-    */   
+   reg [noc_flit_width-1:0] ingress_flit;
+   reg                      ingress_valid;
+   wire 		    ingress_ready;
 
-   localparam READ_OUT_EMPTY  = 3'h4;
-   localparam READ_OUT_STATE  = 3'h5;
-   localparam READ_IN_WAITING = 3'h6;
+   wire [noc_flit_width-1:0] egress_flit;
+   wire                      egress_valid;
+   reg 			     egress_ready;
+
+   reg [noc_flit_width-1:0]  control_flit;
+   reg [noc_flit_width-1:0]  nxt_control_flit;
+   reg 			     control_pending;
+   reg 			     nxt_control_pending;
+
    
    always @(*) begin
-      status_ack = 1'b1;
-      case(bus_addr[5:2])
-        READ_OUT_EMPTY: begin
-           // When we are not in the middle of a message and there is
-           // no packet pending (noc_out_valid is then statically
-           // high), the buffer is empty
-           status_data = {31'h0,((state_out==OUT_IDLE) & !noc_out_valid)};
-        end
-        READ_OUT_STATE: begin
-           // assign state
-           status_data = state_out;
-        end
-        READ_IN_WAITING: begin
-           //
-           status_data = in_valid;
-        end
-        default: begin
-           status_data = 32'hx;
-        end
-      endcase
+      noc_in_ready = !control_pending & ingress_ready;
+      ingress_flit = noc_in_flit;
+      nxt_control_pending = control_pending;
+      nxt_control_flit = control_flit;
+
+      // Ingress part
+      if (noc_in_valid & !control_pending) begin
+	 if ((noc_in_flit[33:32] == 2'b11) && 
+	     (noc_in_flit[26:24] == 3'b111 &&
+	      !noc_in_flit[0])) begin
+	    nxt_control_pending = 1'b1;
+	    nxt_control_flit[33:32] = 2'b11;
+	    nxt_control_flit[31:27] = noc_in_flit[23:19];
+	    nxt_control_flit[26:24] = 3'b111;
+	    nxt_control_flit[23:19] = noc_in_flit[31:27];
+	    nxt_control_flit[18:2] = 17'h0;
+	    nxt_control_flit[1] = enabled;
+	    nxt_control_flit[0] = 1'b1;
+	    ingress_valid = 1'b0;
+	 end else begin
+	    ingress_valid = noc_in_valid;
+	 end
+      end else begin // if (noc_in_valid & !control_pending)
+	 ingress_valid = noc_in_valid;
+      end
+
+      // Egress part
+      if (egress_valid & ~egress_flit[33]) begin
+	 egress_ready = noc_out_ready;
+	 noc_out_valid = egress_valid;
+	 noc_out_flit = egress_flit;
+      end else if (control_pending) begin
+	 egress_ready = 1'b0;
+	 noc_out_valid = 1'b1;
+	 noc_out_flit = control_flit;
+	 if (noc_out_ready) begin
+	    nxt_control_pending = 1'b0;
+	 end
+      end else begin
+	 egress_ready = noc_out_ready;
+	 noc_out_valid = egress_valid;
+	 noc_out_valid = egress_valid;
+	 noc_out_flit = egress_flit;
+      end
+   end // always @ begin
+
+   always @(posedge clk) begin
+      if (rst) begin
+	 control_pending <= 1'b0;
+	 control_flit <= 34'hx;
+      end else begin
+	 control_pending <= nxt_control_pending;
+	 control_flit <= nxt_control_flit;
+      end
    end
 
    // The output packet buffer
@@ -379,29 +453,29 @@ module lisnoc_mp_simple(/*AUTOARG*/
      #()
    u_packetbuffer_out(// Outputs
                       .in_ready         (out_ready),
-                      .out_flit         (noc_out_flit[noc_flit_width-1:0]),
-                      .out_valid        (noc_out_valid),
+                      .out_flit         (egress_flit[noc_flit_width-1:0]),
+                      .out_valid        (egress_valid),
                       .out_size         (),
                       // Inputs
                       .clk              (clk),
                       .rst              (rst),
                       .in_flit          (out_flit[noc_flit_width-1:0]),
                       .in_valid         (out_valid),
-                      .out_ready        (noc_out_ready));
+                      .out_ready        (egress_ready));
    
 
    lisnoc_packet_buffer
      #(.fifo_depth(fifo_depth))
    u_packetbuffer_in(// Outputs
-                     .in_ready          (noc_in_ready),
+                     .in_ready          (ingress_ready),
                      .out_flit          (in_flit[noc_flit_width-1:0]),
                      .out_valid         (in_valid),
                      .out_size          (size_in),
                      // Inputs
                      .clk               (clk),
                      .rst               (rst),
-                     .in_flit           (noc_in_flit[noc_flit_width-1:0]),
-                     .in_valid          (noc_in_valid),
+                     .in_flit           (ingress_flit[noc_flit_width-1:0]),
+                     .in_valid          (ingress_valid),
                      .out_ready         (in_ready));
 
    function integer clog2;
