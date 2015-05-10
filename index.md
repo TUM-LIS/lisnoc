@@ -13,20 +13,15 @@ easiness to understand the code and extendability.
 
 Main features:
 
-<ul>
-  <li>Virtual channel support</li>
-  <li>Flexible router configuration (number of input
-ports, number of output ports,..)</li>
-  <li>Strict ordering</li>
-  <li>Round-robin arbitration for link multiplexing</li>
-</ul>
+* Virtual channel support
+* Flexible router configuration (number of input ports, number of output ports,..)
+* Wormhole routing, strict ordering
+* Round-robin arbitration for link multiplexing
 	
 We only finished documentation roughly, in case of questions, please
-contact <a href="mailto:stefan.wallentowitz@tum.de">Stefan
-Wallentowitz</a>.
+contact [Stefan Wallentowitz](mailto:stefan.wallentowitz@tum.de).
 
-<h2> <a id="getting-started" class="anchor" href="#getting-started"
- aria-hidden="true"><span class="octicon
- octicon-link"></span></a>Getting Started</h2>
-	
+## Getting Started
 
+The easiest to get started is to understand the documentation on the
+right and do some first tests with the testbenches.
