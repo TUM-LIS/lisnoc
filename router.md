@@ -41,3 +41,37 @@ robin). Priorities are enabled with setting `USE_PRIO` to `1` and then
 the next `PH_PRIO_WIDTH` bits after the `PH_DEST_WIDTH` bits are used
 to define priorities. You should be careful when using priorities.
 
+### Router Overview
+
+The following sketch shows an overview of the router with
+`INPUT_PORTS` number of input stages and `OUTPUT_PORTS` number of
+output stages. Each input stage is a router and the lookup
+function. The switch can switch at maximum `OUTPUT_PORTS*VCHANNELS`
+flits er cycle, which is the maximum. The output stages contain the
+output port arbitration. The flits are then buffered and the output
+arbiter selects the virtual channel to transfer next.
+
+<div style="text-align:center" markdown="1">
+![Router](images/lisnoc_router.png "Router")
+</div>
+
+On the outside there are flat signals with ordering port number, then
+virtual channel. For example a router with two input ports and two
+output ports and two vitual channels is connected like:
+
+    [...]
+    .in_valid({in_link_1_valid, in_link_0_valid}),
+    .in_ready({in_link_1_ready, in_link_0_ready})
+    .in_flit({in_link_1_flit, in_link_0_flit}),
+
+    .out_valid({out_link_1_valid, out_link_0_valid}),
+    .out_ready({out_link_1_ready, out_link_0_ready})
+    .out_flit({out_link_1_flit, out_link_0_flit}),
+    [...]
+
+where the signals are defined like
+
+    wire [VCHANNELS-1:0] in_link_0_valid;
+    wire [VCHANNELS-1:0] in_link_0_ready;
+    wire [FLIT_WIDTH-1:0] in_link_0_flit;
+    
