@@ -13,8 +13,11 @@
    height="95"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 1">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="lisnoc_packet.svg"
+   inkscape:export-filename="/home/wallento/dev/lisnoc.gh-pages/images/lisnoc_packet.png"
+   inkscape:export-xdpi="150.14"
+   inkscape:export-ydpi="150.14">
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -23,13 +26,13 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="139.09152"
-     inkscape:cy="19.389626"
+     inkscape:cx="98.306611"
+     inkscape:cy="18.88455"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1153"
+     inkscape:window-height="1031"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="1"
@@ -57,7 +60,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -66,13 +69,6 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-235,-307.36218)">
-    <rect
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
-       id="rect3663"
-       width="220"
-       height="95"
-       x="235"
-       y="307.36218" />
     <text
        xml:space="preserve"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Architects Daughter;-inkscape-font-specification:Architects Daughter"
