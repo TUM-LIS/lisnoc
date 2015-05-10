@@ -512,6 +512,21 @@ aside#sidebar p.repo-owner a {
   font-weight: bold;
 }
 
+.menu {
+    list-style-type: none;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+#menu-current {
+    font-weight: bold;
+}
+
+.submenu {
+    list-style-type: none;
+    margin-bottom: 0px;
+}
+
 #downloads {
   margin-bottom: 40px;
 }
