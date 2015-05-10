@@ -23,5 +23,5 @@ contact [Stefan Wallentowitz](mailto:stefan.wallentowitz@tum.de).
 
 ## Getting Started
 
-The easiest to get started is to understand the documentation on the
-right and do some first tests with the testbenches.
+The easiest to get started is to understand the documentation from the
+menu on the right and then dig into the [tutorials](tutorials.html).
