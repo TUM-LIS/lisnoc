@@ -22,7 +22,7 @@
  * 
  * This is the generic router toplevel.
  * 
- * (c) 2011 by the author(s)
+ * (c) 2011-2015 by the author(s)
  * 
  * Author(s):
  *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
@@ -37,6 +37,8 @@ module lisnoc_router( /*AUTOARG*/
    clk, rst, out_ready, in_flit, in_valid
    );
 
+   // The lowercase parameters are legacy, replace any use by the
+   // uppercase variant!
    parameter  flit_data_width = 32;
    parameter  flit_type_width = 2;
    localparam flit_width = flit_data_width+flit_type_width;
@@ -57,80 +59,119 @@ module lisnoc_router( /*AUTOARG*/
    
    parameter [output_ports*num_dests-1:0] lookup = {num_dests*output_ports{1'b0}};
 
+   // Width of the actual flit data
+   parameter  FLIT_DATA_WIDTH = 32;
+   // Type width, use 2 for the moment
+   parameter  FLIT_TYPE_WIDTH = 2;
+   localparam FLIT_WIDTH = FLIT_DATA_WIDTH + FLIT_TYPE_WIDTH;
+
+   // Number of destinations in the entire NoC
+   parameter  NUM_DESTS = num_dests;
+   // Width of the destination field in the packet header
+   parameter  PH_DEST_WIDTH = ph_dest_width;
+
+   // Use priorities
+   parameter USE_PRIO = use_prio;
+   // Width of the priority field in the packet header
+   parameter PH_PRIO_WIDTH = ph_prio_width;
+
+   // Number of virtual channels
+   parameter VCHANNELS = vchannels;
+
+   // Number of input ports
+   parameter INPUT_PORTS = input_ports;
+   // Number of output ports
+   parameter OUTPUT_PORTS = output_ports;
+
+   // Size of the input FIFOs
+   parameter IN_FIFO_LENGTH = in_fifo_length;
+   // Size of the output FIFOs
+   parameter OUT_FIFO_LENGTH = out_fifo_length;
+
+   // Lookup "table" (will synthesize as logic usually). Be careful
+   // that it is ordered from MSB to LSB, meaning it can be easier
+   // used for readable concatenation like
+   //
+   // {PORT_FOR_DEST0, PORT_FOR_DEST1, ..}
+   parameter [output_ports*num_dests-1:0] LOOKUP = lookup;
+
+   // Clock and reset
    input clk, rst;
 
-   output [output_ports*flit_width-1:0] out_flit;
-   output [output_ports*vchannels-1:0]   out_valid;
-   input [output_ports*vchannels-1:0]    out_ready;
-   
-   input [input_ports*flit_width-1:0]    in_flit;
-   input [input_ports*vchannels-1:0]     in_valid;
-   output [input_ports*vchannels-1:0]    in_ready;
+   // Output interfaces (flat)
+   output [OUTPUT_PORTS*FLIT_WIDTH-1:0] out_flit;
+   output [OUTPUT_PORTS*VCHANNELS-1:0] 	out_valid;
+   input [OUTPUT_PORTS*VCHANNELS-1:0] 	out_ready;
+
+   // Input interfaces (flat)
+   input [INPUT_PORTS*FLIT_WIDTH-1:0] 	in_flit;
+   input [INPUT_PORTS*VCHANNELS-1:0] 	in_valid;
+   output [INPUT_PORTS*VCHANNELS-1:0] 	in_ready;
    
    // Array conversion
-   wire [flit_width-1:0] out_flit_array [0:output_ports-1];
-   wire [vchannels-1:0]   out_valid_array [0:output_ports-1];
-   wire [vchannels-1:0]   out_ready_array [0:output_ports-1];
+   wire [FLIT_WIDTH-1:0] 		out_flit_array [0:OUTPUT_PORTS-1];
+   wire [VCHANNELS-1:0] 		out_valid_array [0:OUTPUT_PORTS-1];
+   wire [VCHANNELS-1:0] 		out_ready_array [0:OUTPUT_PORTS-1];
    
-   wire [flit_width-1:0] in_flit_array [0:input_ports-1];
-   wire [vchannels-1:0]   in_valid_array [0:input_ports-1];
-   wire [vchannels-1:0]   in_ready_array [0:input_ports-1];
+   wire [FLIT_WIDTH-1:0] 		in_flit_array [0:INPUT_PORTS-1];
+   wire [VCHANNELS-1:0] 		in_valid_array [0:INPUT_PORTS-1];
+   wire [VCHANNELS-1:0] 		in_ready_array [0:INPUT_PORTS-1];
 
    genvar                 p;
    genvar                 op,v,ip;
    generate
-      for (p=0;p<output_ports;p=p+1) begin : output_arrays
-         assign out_flit[(p+1)*flit_width-1:p*flit_width] = out_flit_array[p];
-         assign out_valid[(p+1)*vchannels-1:p*vchannels]    = out_valid_array[p];
-         assign out_ready_array[p] = out_ready[(p+1)*vchannels-1:p*vchannels];
+      for (p = 0; p < OUTPUT_PORTS; p = p + 1) begin : output_arrays
+         assign out_flit[(p+1)*FLIT_WIDTH-1:p*FLIT_WIDTH] = out_flit_array[p];
+         assign out_valid[(p+1)*VCHANNELS-1:p*VCHANNELS]  = out_valid_array[p];
+         assign out_ready_array[p] = out_ready[(p+1)*VCHANNELS-1:p*VCHANNELS];
       end
    endgenerate
 
    generate
-      for (p=0;p<input_ports;p=p+1) begin : input_arrays
-         assign in_flit_array[p]  = in_flit[(p+1)*flit_width-1:p*flit_width];
-         assign in_valid_array[p] = in_valid[(p+1)*vchannels-1:p*vchannels];
-         assign in_ready[(p+1)*vchannels-1:p*vchannels] = in_ready_array[p];
+      for (p = 0; p < INPUT_PORTS; p = p + 1) begin : input_arrays
+         assign in_flit_array[p]  = in_flit[(p+1)*FLIT_WIDTH-1:p*FLIT_WIDTH];
+         assign in_valid_array[p] = in_valid[(p+1)*VCHANNELS-1:p*VCHANNELS];
+         assign in_ready[(p+1)*VCHANNELS-1:p*VCHANNELS] = in_ready_array[p];
       end
    endgenerate
      
    // Those are the switching wires
-   wire [flit_width*vchannels-1:0] switch_in_flit[0:input_ports-1];
-   wire [output_ports*vchannels-1:0]        switch_in_request[0:input_ports-1];
-   wire [output_ports*vchannels-1:0]        switch_in_read[0:input_ports-1];
+   wire [FLIT_WIDTH*VCHANNELS-1:0]   switch_in_flit[0:INPUT_PORTS-1];
+   wire [OUTPUT_PORTS*VCHANNELS-1:0] switch_in_request[0:INPUT_PORTS-1];
+   wire [OUTPUT_PORTS*VCHANNELS-1:0] switch_in_read[0:INPUT_PORTS-1];
    
-   wire [flit_width*vchannels*input_ports-1:0] switch_out_flit[0:output_ports-1];
-   wire [input_ports*vchannels-1:0]             switch_out_request[0:output_ports-1];
-   wire [input_ports*vchannels-1:0]             switch_out_read[0:output_ports-1];
+   wire [FLIT_WIDTH*VCHANNELS*INPUT_PORTS-1:0] switch_out_flit[0:OUTPUT_PORTS-1];
+   wire [INPUT_PORTS*VCHANNELS-1:0] 	       switch_out_request[0:OUTPUT_PORTS-1];
+   wire [INPUT_PORTS*VCHANNELS-1:0] 	       switch_out_read[0:OUTPUT_PORTS-1];
 
    // Switch
-   wire [flit_width*input_ports*vchannels-1:0] all_flits;
+   wire [FLIT_WIDTH*INPUT_PORTS*VCHANNELS-1:0] all_flits;
 
    generate
-      for (p=0;p<input_ports;p=p+1) begin : compose_all_flits
-         assign all_flits[(p+1)*vchannels*flit_width-1:p*vchannels*flit_width] = switch_in_flit[p];
+      for (p = 0; p < INPUT_PORTS; p = p + 1) begin : compose_all_flits
+         assign all_flits[(p+1)*VCHANNELS*FLIT_WIDTH-1:p*VCHANNELS*FLIT_WIDTH] = switch_in_flit[p];
       end
    endgenerate
 
    generate
-      for (p=0;p<output_ports;p=p+1) begin : assign_all_flits
+      for (p = 0; p < OUTPUT_PORTS; p = p + 1) begin : assign_all_flits
          assign switch_out_flit[p] = all_flits;
       end
    endgenerate
 
    generate
-      for (op=0;op<output_ports;op=op+1) begin
-         for (v=0;v<vchannels;v=v+1) begin
-            for (ip=0;ip<input_ports;ip=ip+1) begin
-               assign switch_out_request[op][v*input_ports+ip] = switch_in_request[ip][v*output_ports+op];
-               assign switch_in_read[ip][v*output_ports+op] = switch_out_read[op][v*input_ports+ip];
+      for (op = 0; op < OUTPUT_PORTS; op = op + 1) begin: connect_switch
+         for (v = 0; v < VCHANNELS; v = v + 1) begin
+            for (ip = 0; ip < INPUT_PORTS; ip = ip + 1) begin
+               assign switch_out_request[op][v*INPUT_PORTS+ip] = switch_in_request[ip][v*OUTPUT_PORTS+op];
+               assign switch_in_read[ip][v*OUTPUT_PORTS+op]    = switch_out_read[op][v*INPUT_PORTS+ip];
             end
          end
       end
    endgenerate
    
    generate
-      for (p=0;p<input_ports;p=p+1) begin : inputs
+      for (p = 0; p < INPUT_PORTS; p = p + 1) begin : inputs
          /* lisnoc_router_input AUTO_TEMPLATE (
          .link_ready     (in_ready_array[p]),
          .link_flit      (in_flit_array[p]),
@@ -141,10 +182,10 @@ module lisnoc_router( /*AUTOARG*/
          );*/
          
          lisnoc_router_input
-            #(.vchannels(vchannels),.ports(output_ports),
-               .num_dests(num_dests),.lookup(lookup),.flit_data_width(flit_data_width),
-               .flit_type_width(flit_type_width),.ph_dest_width(ph_dest_width),
-               .fifo_length(in_fifo_length))
+            #(.vchannels(VCHANNELS),.ports(OUTPUT_PORTS),
+               .num_dests(NUM_DESTS),.lookup(LOOKUP),.flit_data_width(FLIT_DATA_WIDTH),
+               .flit_type_width(FLIT_TYPE_WIDTH),.ph_dest_width(PH_DEST_WIDTH),
+               .fifo_length(IN_FIFO_LENGTH))
          inputs(/*AUTOINST*/
                 // Outputs
                 .link_ready             (in_ready_array[p]),     // Templated
@@ -156,11 +197,11 @@ module lisnoc_router( /*AUTOARG*/
                 .link_flit              (in_flit_array[p]),      // Templated
                 .link_valid             (in_valid_array[p]),     // Templated
                 .switch_read            (switch_in_read[p]));    // Templated
-      end
+      end // block: inputs
    endgenerate
 
    generate
-      for (p=0;p<output_ports;p=p+1) begin : outputs
+      for (p = 0; p < OUTPUT_PORTS; p = p + 1) begin : outputs
          /* lisnoc_router_output AUTO_TEMPLATE (
          .link_flit      (out_flit_array[p]),
          .link_valid     (out_valid_array[p]),
@@ -172,8 +213,10 @@ module lisnoc_router( /*AUTOARG*/
          
          lisnoc_router_output
 
-         #(.vchannels(vchannels),.ports(input_ports), .flit_data_width(flit_data_width),.flit_type_width(flit_type_width), .fifo_length(out_fifo_length),
-              .use_prio(use_prio),.ph_prio_width(ph_prio_width),.ph_prio_offset(ph_dest_width))
+         #(.vchannels(VCHANNELS),.ports(INPUT_PORTS),
+              .flit_data_width(FLIT_DATA_WIDTH),.flit_type_width(FLIT_TYPE_WIDTH),
+              .fifo_length(OUT_FIFO_LENGTH),
+              .use_prio(USE_PRIO),.ph_prio_width(PH_PRIO_WIDTH),.ph_prio_offset(PH_DEST_WIDTH))
 
          outputs (/*AUTOINST*/
                   // Outputs
@@ -186,7 +229,7 @@ module lisnoc_router( /*AUTOARG*/
                   .link_ready           (out_ready_array[p]),    // Templated
                   .switch_request       (switch_out_request[p]), // Templated
                   .switch_flit          (switch_out_flit[p]));   // Templated
-            end // for (p=0;p<output_ports;p=p+1)
+      end // block: outputs
    endgenerate
       
 endmodule // lisnoc_router
