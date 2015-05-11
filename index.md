@@ -25,3 +25,15 @@ contact [Stefan Wallentowitz](mailto:stefan.wallentowitz@tum.de).
 
 The easiest to get started is to understand the documentation from the
 menu on the right and then dig into the [tutorials](tutorials.html).
+
+## Getting Involved & Staying Informed
+
+We ar happy to get your feedback and input. If you want to get
+involved or stay updated, you are invited to join the
+[OpTiMSoC](optimsoc.org) mailing list, where we also discuss LISNoC
+related topics:
+
+<form method="post"
+action="https://lists.lrz.de/mailman/subscribe/optimsoc"> Your E-mail
+address: <input name="email"> <input type="submit" name="email-button"
+value= "Subscribe"> </form>
