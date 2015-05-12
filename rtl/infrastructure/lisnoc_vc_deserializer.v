@@ -1,32 +1,30 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * This is a deserializer for virtual channels
- * 
- * (c) 2011 by the author(s)
- * 
+ *
  * Author(s):
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de, 
- *    Alexandra Weber, sandra.eli.weber@mytum.de
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
+ *   Alexandra Weber <sandra.eli.weber@mytum.de>
  */
 
 // TODO: Make more flexible by lookup vector class->vc
@@ -81,7 +79,7 @@ module lisnoc_vc_deserializer(
 
    reg state;
    reg nxt_state;
-   
+
 
    always @ (*) begin: fsm
 
@@ -95,7 +93,7 @@ module lisnoc_vc_deserializer(
          nxt_flit_o = 'hx;
          nxt_valid_o = {vchannels{1'b0}};
          ready_for_input = 1'b0;
-         if(flit_i[flit_width-1:flit_width-2] == FLIT_TYPE_HEADER || 
+         if(flit_i[flit_width-1:flit_width-2] == FLIT_TYPE_HEADER ||
             flit_i[flit_width-1:flit_width-2] == FLIT_TYPE_SINGLE) begin
             nxt_req_vchannel = flit_i[class_msb:class_lsb];
             nxt_state = SENDING;
@@ -116,7 +114,7 @@ module lisnoc_vc_deserializer(
         if(ready_for_output[req_vchannel] == 1'b1) begin
                ready_for_input = 1'b1;
                nxt_flit_o = flit_i;
-               if(flit_o[flit_width-1:flit_width-2] == FLIT_TYPE_SINGLE || 
+               if(flit_o[flit_width-1:flit_width-2] == FLIT_TYPE_SINGLE ||
                   flit_o[flit_width-1:flit_width-2] == FLIT_TYPE_LAST) begin
                   nxt_state = WAITING;
                   nxt_valid_o[nxt_req_vchannel] = 1'b0;

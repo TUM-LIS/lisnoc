@@ -1,35 +1,32 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * Simple (software-controlled) message passing module.
- * 
- * (c) 2012-2013 by the author(s)
- * 
- * Author(s): 
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
  *
+ * Author(s):
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
 
-/**
+/*
  *
  *                   +-> Input path <- packet buffer <-- Ingress
  *                   |    * raise interrupt (!empty)
@@ -38,7 +35,7 @@
  *                   +-> Output path -> packet buffer --> Egress
  *                        * set size
  *                        * write flits to packet buffer
- * 
+ *
  * Ingress <---+----- NoC
  *             |
  *       Handle control message
@@ -63,7 +60,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
    parameter  fifo_depth = 16;
    localparam size_width = clog2(fifo_depth+1);
-   
+
    input clk;
    input rst;
 
@@ -85,8 +82,8 @@ module lisnoc_mp_simple(/*AUTOARG*/
    output reg                      bus_ack;
 
    output                          irq;
-   
-   // Connect from the outgoing state machine to the packet buffer   
+
+   // Connect from the outgoing state machine to the packet buffer
    wire                        out_ready;
    reg                         out_valid;
    wire [noc_flit_width-1:0]   out_flit;
@@ -138,7 +135,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
       if_fifo_in_en = 1'b0;
       if_fifo_out_en = 1'b0;
-      
+
       if (bus_en) begin
 	 if (bus_addr[5:2] == 4'h0) begin
 	    if (!bus_we) begin
@@ -167,7 +164,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 	 enabled <= nxt_enabled;
       end
    end
-   
+
    /**
     * Simple writes to 0x0
     *  * Start transfer and set size S
@@ -187,7 +184,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
    reg [size_width-1:0]       nxt_size_out;
 
    wire [size_width-1:0]      size_in;
-   
+
    // States of output state machine
    localparam OUT_IDLE    = 0;
    localparam OUT_FIRST   = 1;
@@ -240,7 +237,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 	   nxt_state_in = IN_IDLE;
         end
       endcase
-   end   
+   end
 
    // Combinational part of output state machine
    always @(*) begin
@@ -274,7 +271,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
               // to out_flit. Set out_valid to signal the flit should
               // be output
               out_valid = 1'b1;
-              
+
               // The type is either SINGLE (size==1) or HEADER
               if (size_out==1) begin
                  out_type = 2'b11;
@@ -288,7 +285,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
                  // Decrement size
                  nxt_size_out = size_out-1;
-                 
+
                  // Acknowledge to the bus
                  if_fifo_out_ack = 1'b1;
 
@@ -334,7 +331,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
                  // Decrement size
                  nxt_size_out = size_out-1;
-                 
+
                  // Acknowledge to the bus
                  if_fifo_out_ack = 1'b1;
 
@@ -348,7 +345,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
               end else begin // if (out_ready)
                  // If the packet buffer is not ready, we simply hold
                  // the data and valid and wait another cycle for the
-                 // packet buffer to become ready                
+                 // packet buffer to become ready
                  nxt_state_out = OUT_PAYLOAD;
               end
            end else begin // if (bus_we && bus_en)
@@ -390,7 +387,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
    reg 			     control_pending;
    reg 			     nxt_control_pending;
 
-   
+
    always @(*) begin
       noc_in_ready = !control_pending & ingress_ready;
       ingress_flit = noc_in_flit;
@@ -399,7 +396,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
       // Ingress part
       if (noc_in_valid & !control_pending) begin
-	 if ((noc_in_flit[33:32] == 2'b11) && 
+	 if ((noc_in_flit[33:32] == 2'b11) &&
 	     (noc_in_flit[26:24] == 3'b111 &&
 	      !noc_in_flit[0])) begin
 	    nxt_control_pending = 1'b1;
@@ -462,7 +459,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
                       .in_flit          (out_flit[noc_flit_width-1:0]),
                       .in_valid         (out_valid),
                       .out_ready        (egress_ready));
-   
+
 
    lisnoc_packet_buffer
      #(.fifo_depth(fifo_depth))

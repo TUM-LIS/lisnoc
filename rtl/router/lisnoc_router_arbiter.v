@@ -1,34 +1,31 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * This is the arbiter for each vchannel on the output port. It works
  * as round robin arbiter at the moment.
- * 
- * (c) 2011 by the author(s)
- * 
- * Author(s): 
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
- *    Andreas Lankes, andreas.lankes@tum.de
  *
+ * Author(s):
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
+ *   Andreas Lankes <andreas.lankes@tum.de>
  */
 
 `include "lisnoc_def.vh"
@@ -45,10 +42,10 @@ module lisnoc_router_arbiter (/*AUTOARG*/
    parameter flit_type_width = 2;
    localparam flit_width = flit_data_width+flit_type_width;
 
-   parameter vchannels = 1; 
+   parameter vchannels = 1;
    parameter ports = 5;
    localparam ports_width = $clog2(ports);
-   
+
    input clk;
    input rst;
 
@@ -56,7 +53,7 @@ module lisnoc_router_arbiter (/*AUTOARG*/
    input [flit_width*ports-1:0]  flit_i; // flit data from all input ports
    input [ports-1:0] 		  request_i; // request signal from each vc of each input port
    output reg [ports-1:0] 	  read_o; // select signal for each vc of each input port
-   
+
    // FIFO side, output side
    output [flit_width-1:0] flit_o;
    output reg 			valid_o;
@@ -64,13 +61,13 @@ module lisnoc_router_arbiter (/*AUTOARG*/
 
    reg nxt_activeroute;
    reg activeroute;
-   
+
    reg [ports-1:0] activeport;
    wire [ports-1:0] port;
 
    reg [ports_width-1:0] portnum;
    reg [ports_width-1:0] activeportnum;
-   
+
    wire [flit_width-1:0] flit_i_array [0:ports-1];
 
    genvar 		  p;
@@ -80,15 +77,15 @@ module lisnoc_router_arbiter (/*AUTOARG*/
       end
    endgenerate
 
-   
+
    wire [1:0] flit_type;
    assign flit_type = flit_i_array[portnum][flit_width-1:flit_width-2];
 
    assign flit_o = flit_i_array[portnum];
-   
+
    wire [ports-1:0] 	       req_masked;
    assign req_masked = {ports{~activeroute & ready_i}} & request_i;
-   
+
    /* lisnoc_arb_rr AUTO_TEMPLATE(
     .req  (req_masked),
     .gnt  (activeport),
@@ -102,7 +99,7 @@ module lisnoc_router_arbiter (/*AUTOARG*/
          // Inputs
          .req				(req_masked),		 // Templated
          .gnt				(activeport));		 // Templated
-   
+
 
    always @(*) begin : convertonehot
       integer i;
@@ -115,11 +112,11 @@ module lisnoc_router_arbiter (/*AUTOARG*/
             activeportnum = i;
       end
    end
-   
+
    always @(*) begin
       nxt_activeroute = activeroute;
       read_o = {ports{1'b0}};
- 
+
       if (activeroute) begin
          if (request_i[activeportnum] && ready_i) begin
             read_o[activeportnum] = 1'b1;
@@ -150,7 +147,7 @@ module lisnoc_router_arbiter (/*AUTOARG*/
          activeport <= port;
       end
    end
-   
+
 
 endmodule // noc_router_arbiter
 
@@ -160,6 +157,3 @@ endmodule // noc_router_arbiter
 // verilog-library-directories:("../")
 // verilog-auto-inst-param-value: t
 // End:
-
-
-

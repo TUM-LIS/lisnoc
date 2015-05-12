@@ -1,31 +1,29 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * The testbench for a router.
  *
- * (c) 2011 by the author(s)
- * 
- * Author(s): 
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
+ * Author(s):
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
 
 // TODO
@@ -43,18 +41,18 @@
 class packet;
    integer vchannels;
    bit [4:0] self;   // packet source
-   
+
    rand bit [4:0] dest;
    rand bit [31:0] payload[];
    rand integer vc;
    rand bit [3:0] prio;
-   
-   rand integer unsigned burst_delay;                                    
 
-   constraint valid_dest { dest >= 0; dest < 5; dest != self; }        
+   rand integer unsigned burst_delay;
+
+   constraint valid_dest { dest >= 0; dest < 5; dest != self; }
    constraint len_lim { payload.size > 0; payload.size <= 32; }
-   constraint valid_vc { vc >= 0; vc < vchannels; }                      
-   constraint dist_burst_delay { burst_delay dist { 0:= 80, 4:= 10, 10:= 10 }; } 
+   constraint valid_vc { vc >= 0; vc < vchannels; }
+   constraint dist_burst_delay { burst_delay dist { 0:= 80, 4:= 10, 10:= 10 }; }
    constraint dist_prio { prio dist { 4'b0000:=1, 4'b1000:= 1, 4'b1100:= 1, 4'b1110:=1, 4'b1111:= 1 }; }
 endclass // packet
 
@@ -64,9 +62,9 @@ class randomdelay; // to delay receive acceptance
 endclass // randomdelay
 
 //**************************************************************
-// contraints declaration until here 
+// contraints declaration until here
 //**************************************************************
-   
+
 typedef struct {
    flit_t #(`DATA_WIDTH,`TYPE_WIDTH) flit;
    time      timestamp;
@@ -80,8 +78,8 @@ class expect_queue #(int vchannels = 1);
    real      avg_latency;
 
    integer   cur_src[5][vchannels];
-   
-   function new();  
+
+   function new();
       for(int i=0;i<5;i++) begin
          for(int j=0;j<vchannels;j++) begin
             cur_src[i][j] = -1;
@@ -103,7 +101,7 @@ class expect_queue #(int vchannels = 1);
    task automatic receive_stat(sent_flit f);
       integer c;
       integer hand1;
-      
+
       sem_recv.get(1);
       avg_latency = (avg_latency * recv_success + real'($time - f.timestamp))/(recv_success+1);
       c = ++recv_success;
@@ -113,7 +111,7 @@ class expect_queue #(int vchannels = 1);
         $display("%t flits: %0d %f",$time,c,avg_latency);
       end
    endtask // receive_stat
-   
+
    // This task checks if the transmission was successfull or not
    task automatic check(int target,flit_t #(`DATA_WIDTH,`TYPE_WIDTH) flit,int vc,ref int source);
       sent_flit f;
@@ -139,7 +137,7 @@ class expect_queue #(int vchannels = 1);
                receive_stat(f);
                return;
             end
-         end     
+         end
       end
 
       $display("%t Mismatch for %x on %0d[%1d]",$time,flit.content,target,vc);
@@ -153,9 +151,9 @@ class expect_queue #(int vchannels = 1);
             $display("%t   [%0d] (%x%x,%0t)",$time,s,f.flit.ftype,f.flit.content,f.timestamp);
          end
       end
-        
+
       $fatal(1,"Mismatch");  // This stops the simulation immediately
-   
+
    endtask // check
 endclass // expect_queue
 
@@ -168,10 +166,10 @@ program tb_noc_router_test
    parameter vchannels = 1;
 
    expect_queue #(.vchannels(vchannels)) eq = new();
-   
+
    initial begin
       eq = new();
-      
+
       @(negedge rst);
       fork
          packet_generate(0);
@@ -193,11 +191,11 @@ program tb_noc_router_test
       flit_header_t #(`DATA_WIDTH) header;
       flit_t #(`DATA_WIDTH,`TYPE_WIDTH) flit;
       sent_flit sflit;
-      
+
       p = new();
       p.self = id;
       p.vchannels = vchannels;
-      
+
       forever begin
          void'(p.randomize());
          header = new();
@@ -205,7 +203,7 @@ program tb_noc_router_test
          header.dest = p.dest;
          header.prio = p.prio;
          header.class_specific[3:0] = id;
-         
+
          flit.ftype = HEADER;
          flit.content = {header.dest,header.prio,header.packet_class,header.class_specific};
          tb_if.send(id,p.dest,p.vc,flit,p.burst_delay);
@@ -238,17 +236,17 @@ program tb_noc_router_test
       int vc;
       int source;
       randomdelay d = new();
-         
+
       forever begin
          void'(d.randomize());
          tb_if.receive(id,d.delay,vc,flit);
          eq.check(id,flit,vc,source);
       end
-      
+
    endtask // packet_monitor
-   
+
 endprogram // tb_noc_router_test
-   
+
 interface testbench_if
   (
    input clk,
@@ -281,13 +279,13 @@ interface testbench_if
    assign south_in.flit = {in_flit_type[2],in_flit_content[2]};
    assign west_in.flit  = {in_flit_type[3],in_flit_content[3]};
    assign local_in.flit = {in_flit_type[4],in_flit_content[4]};
-   
+
    assign north_in.valid = in_valid[0];
    assign east_in.valid = in_valid[1];
    assign south_in.valid = in_valid[2];
    assign west_in.valid = in_valid[3];
    assign local_in.valid = in_valid[4];
- 
+
    assign north_out.ready = out_ready[0];
    assign east_out.ready = out_ready[1];
    assign south_out.ready = out_ready[2];
@@ -309,7 +307,7 @@ interface testbench_if
       in_ready[1] <= east_in.ready;
       in_ready[2] <= south_in.ready;
       in_ready[3] <= west_in.ready;
-      in_ready[4] <= local_in.ready;      
+      in_ready[4] <= local_in.ready;
    end
 
    initial begin
@@ -320,7 +318,7 @@ interface testbench_if
          end
       end
    end
-   
+
    task automatic send(int source,int target,int vc,flit_t #(`DATA_WIDTH,`TYPE_WIDTH) flit,int delay);
       repeat(delay) @(posedge clk);
       in_valid[source][vc] = 1'b1;
@@ -339,11 +337,11 @@ interface testbench_if
 
       @(posedge clk iff |out_valid[target]);
       {flit.ftype,flit.content} = {out_flit_type[target],out_flit_content[target]};
-      
+
       for (int i=0;i<vchannels;i=i+1) begin
          if (out_valid[target][i]) begin
             vc = i;
-            $display("%t received for %3d on vc %1d: %x%x",$time,target,vc,flit.ftype,flit.content);  
+            $display("%t received for %3d on vc %1d: %x%x",$time,target,vc,flit.ftype,flit.content);
             break;
          end
       end
@@ -351,7 +349,7 @@ interface testbench_if
    endtask
 
 endinterface // testbench_if
-   
+
 module tb_noc_router();
 
    reg clk;
@@ -369,8 +367,8 @@ module tb_noc_router();
    lisnoc_link_if #(.vchannels(vchannels)) west_in();
    lisnoc_link_if #(.vchannels(vchannels)) west_out();
    lisnoc_link_if #(.vchannels(vchannels)) local_in();
-   lisnoc_link_if #(.vchannels(vchannels)) local_out();   
-   
+   lisnoc_link_if #(.vchannels(vchannels)) local_out();
+
    // Router interface
    lisnoc_router_2dgrid_sv #(.vchannels(vchannels),.use_prio(use_prio))
      uut(
@@ -388,10 +386,10 @@ module tb_noc_router();
       // Inputs
       .clk                      (clk),
       .rst                      (rst));
-   
+
    defparam uut.num_dests = 5;
    defparam uut.lookup = { SELECT_NORTH, SELECT_EAST, SELECT_SOUTH, SELECT_WEST, SELECT_LOCAL };
-  
+
 
    initial begin
       clk = 0;
@@ -415,14 +413,14 @@ module tb_noc_router();
       .local_out                        (local_out),
       // Inputs
       .clk                              (clk));
-   
-   tb_noc_router_test #(.vchannels(vchannels)) 
+
+   tb_noc_router_test #(.vchannels(vchannels))
    test(// Interfaces
       .tb_if                            (tb_if),
       // Inputs
       .clk                              (clk),
       .rst                              (rst));
-   
+
 endmodule // tb_noc_router
 
 // Local Variables:

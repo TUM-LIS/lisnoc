@@ -1,31 +1,29 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * This is the SystemVerilog wrapper for the router.
- * 
- * (c) 2011 by the author(s)
- * 
+ *
  * Author(s):
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
 
 `include "lisnoc_def_mc.vh"
@@ -42,9 +40,9 @@ module lisnoc_mesh2x2_sv
    lisnoc_link_if link3_in,
    input clk, rst
    );
-   
+
    parameter vchannels = 1;
-   
+
    wire [`FLIT_WIDTH-1:0] link0_in_flit_i;
    wire [vchannels-1:0]   link0_in_valid_i;
    wire [vchannels-1:0]   link0_in_ready_o;
@@ -72,10 +70,10 @@ module lisnoc_mesh2x2_sv
    wire [`FLIT_WIDTH-1:0] link3_out_flit_o;
    wire [vchannels-1:0]   link3_out_valid_o;
    wire [vchannels-1:0]   link3_out_ready_i;
-   
+
    assign link0_out.flit    = link0_out_flit_o;
    assign link0_out.valid   = link0_out_valid_o;
-   assign link0_out_ready_i = link0_out.ready;  
+   assign link0_out_ready_i = link0_out.ready;
    assign link1_out.flit    = link1_out_flit_o;
    assign link1_out.valid   = link1_out_valid_o;
    assign link1_out_ready_i = link1_out.ready;
@@ -98,7 +96,7 @@ module lisnoc_mesh2x2_sv
    assign link3_in_flit_i  = link3_in.flit;
    assign link3_in_valid_i = link3_in.valid;
    assign link3_in.ready   = link3_in_ready_o;
-   
+
    lisnoc_mesh2x2 #(.vchannels(vchannels))
    mesh2x2_v(/*AUTOINST*/
 	     // Outputs
@@ -129,8 +127,8 @@ module lisnoc_mesh2x2_sv
 	     .link3_in_flit_i		(link3_in_flit_i[`FLIT_WIDTH-1:0]),
 	     .link3_in_valid_i		(link3_in_valid_i[vchannels-1:0]),
 	     .link3_out_ready_i		(link3_out_ready_i[vchannels-1:0]));
-   
-	     
-   
-   
+
+
+
+
 endmodule // lisnoc_mesh2x2_sv

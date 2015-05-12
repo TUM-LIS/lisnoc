@@ -1,36 +1,34 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * As SystemVerilog allows for better definition of datatypes than
  * the macros in lisnoc_def.vh this is provided for convenience.
  * You always must assure that the settings correspond to the ones
  * in Verilog.
  *
- * (c) 2011 by the author(s)
- * 
- * Author(s): 
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
- *    Andreas Lankes, andreas.lankes@tum.de
- *    Michael Tempelmeier, michael.tempelmeier@tum.de
+ * Author(s):
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
+ *   Andreas Lankes <andreas.lankes@tum.de>
+ *   Michael Tempelmeier <michael.tempelmeier@tum.de>
  */
 
 typedef enum bit[4:0] {SELECT_NONE=0,SELECT_NORTH=1,SELECT_EAST=2,SELECT_SOUTH=4,SELECT_WEST=8,SELECT_LOCAL=16} dir_select_t;
@@ -54,5 +52,3 @@ class flit_header_t #(int data_width=32);
         bit [2:0] packet_class;
         bit [data_width-13:0] class_specific;
 endclass
-
-

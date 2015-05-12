@@ -1,31 +1,29 @@
-/**
- * This file is part of LISNoC.
- * 
- * LISNoC is free hardware: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as 
- * published by the Free Software Foundation, either version 3 of 
- * the License, or (at your option) any later version.
+/* Copyright (c) 2015 by the author(s)
  *
- * As the LGPL in general applies to software, the meaning of
- * "linking" is defined as using the LISNoC in your projects at
- * the external interfaces.
- * 
- * LISNoC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Lesser General Public 
- * License along with LISNoC. If not, see <http://www.gnu.org/licenses/>.
- * 
- * =================================================================
- * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * =============================================================================
+ *
  * This is the SystemVerilog wrapper for the router.
- * 
- * (c) 2011 by the author(s)
- * 
+ *
  * Author(s):
- *    Stefan Wallentowitz, stefan.wallentowitz@tum.de
+ *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
 
 `include "lisnoc_def.vh"
@@ -45,15 +43,15 @@ module lisnoc_router_2dgrid_sv
    lisnoc_link_if local_in,
    input clk, rst
    );
-   
+
    parameter flit_data_width = 32;
    parameter flit_type_width = 2;
    localparam flit_width = flit_data_width+flit_type_width;
    parameter destwidth = 5;
-   parameter num_dests = 32; 
-   
+   parameter num_dests = 32;
+
    parameter use_prio = 0;
-   parameter ph_prio_width = 4;  
+   parameter ph_prio_width = 4;
 
    parameter vchannels = 1;
 
@@ -75,7 +73,7 @@ module lisnoc_router_2dgrid_sv
    wire [flit_width-1:0] local_out_flit_o;
    wire [vchannels-1:0]   local_out_valid_o;
    wire [vchannels-1:0]   local_out_ready_i;
-   
+
    wire [flit_width-1:0] north_in_flit_i;
    wire [vchannels-1:0]   north_in_valid_i;
    wire [vchannels-1:0]   north_in_ready_o;
@@ -163,6 +161,6 @@ module lisnoc_router_2dgrid_sv
               .west_in_valid_i          (west_in_valid_i[vchannels-1:0]),
               .local_in_flit_i          (local_in_flit_i[flit_width-1:0]),
               .local_in_valid_i         (local_in_valid_i[vchannels-1:0]));
-   
-   
+
+
 endmodule // lisnoc_router_sv
