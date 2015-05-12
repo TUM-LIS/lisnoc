@@ -19,10 +19,10 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This is the FIFO used in the input and output port.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
 
@@ -34,25 +34,25 @@ module lisnoc_fifo(/*AUTOARG*/
    // Inputs
    clk, rst, in_flit, in_valid, out_ready
    );
-  
+
    parameter flit_data_width = 32;
    parameter flit_type_width = 2;
    parameter packet_length   = 0;
-   
+
    localparam flit_width = flit_data_width+flit_type_width;
 
    parameter LENGTH = 16;
-   
-   input  clk; 
-   input  rst; 
-   
+
+   input  clk;
+   input  rst;
+
    // FIFO input side
-   input  [flit_width-1:0] in_flit;  // input   
+   input  [flit_width-1:0] in_flit;   // input
    input  in_valid;                   // write_enable
    output in_ready;                   // accepting new data
-   
+
    //FIFO output side
-   output [flit_width-1:0] out_flit;  // data_out
+   output [flit_width-1:0] out_flit;   // data_out
    output out_valid;                   // data available
    input  out_ready;                   // read request
 
@@ -72,7 +72,7 @@ module lisnoc_fifo(/*AUTOARG*/
    assign out_valid = !fifo_write_ptr[0];
 
    assign in_ready = !fifo_write_ptr[LENGTH];
-   
+
    always @(posedge clk) begin
       if (rst) begin
          fifo_write_ptr <= {{LENGTH{1'b0}},1'b1};
@@ -99,7 +99,7 @@ module lisnoc_fifo(/*AUTOARG*/
          end else begin
             nxt_fifo_data[i] = fifo_data[i];
          end
-      end      
+      end
    end
 
    always @(posedge clk) begin : shift_register_seq

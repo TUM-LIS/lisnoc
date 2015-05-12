@@ -1,14 +1,14 @@
 `ifndef MEASUREMENT_SV
 `define MEASUREMENT_SV
 
-/** 
+/**
  * This class performs the actual measurement
  */
 class measurement #(int flit_data_width,flit_dest_width,mc_supported,mc_num_dests);
    packet #(flit_data_width,flit_dest_width,mc_supported,mc_num_dests) packets[integer];
    integer n = 0;
    integer acc_lat=0;
-   integer net_lat=0;   
+   integer net_lat=0;
    integer N;
    integer nflits = 0;
    bit     stopnow = 0;
@@ -16,16 +16,16 @@ class measurement #(int flit_data_width,flit_dest_width,mc_supported,mc_num_dest
    function void stop();
       stopnow = 1;
    endfunction // stop
-   
-   
+
+
    function new();
       N = sysconfig::get().numPackets;
    endfunction // new
-   
-   
+
+
    function void add(packet #(flit_data_width,flit_dest_width,mc_supported,mc_num_dests) p);
 //      $display("add %0d",p.id);
-      
+
       packets[p.id] = p;
    endfunction // add
 
@@ -38,7 +38,7 @@ class measurement #(int flit_data_width,flit_dest_width,mc_supported,mc_num_dest
       net_lat = net_lat + ($time-p.net);
 
       n++;
-      
+
       nflits = nflits + p.flits.size();
 
       if (stopnow || n==N) begin

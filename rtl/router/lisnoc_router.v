@@ -19,11 +19,11 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This is the generic router toplevel.
- * 
+ *
  * (c) 2011-2015 by the author(s)
- * 
+ *
  * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
@@ -42,21 +42,21 @@ module lisnoc_router( /*AUTOARG*/
    parameter  flit_data_width = 32;
    parameter  flit_type_width = 2;
    localparam flit_width = flit_data_width+flit_type_width;
-   
+
    parameter  num_dests = 32;
    parameter  ph_dest_width = 5;
 
    parameter use_prio = 0;
    parameter ph_prio_width = 4;
-   
+
    parameter vchannels = 1;
-   
+
    parameter input_ports = 5;
    parameter output_ports = 5;
 
    parameter in_fifo_length = 4;
-   parameter out_fifo_length = 4;   
-   
+   parameter out_fifo_length = 4;
+
    parameter [output_ports*num_dests-1:0] lookup = {num_dests*output_ports{1'b0}};
 
    // Width of the actual flit data
@@ -100,22 +100,22 @@ module lisnoc_router( /*AUTOARG*/
 
    // Output interfaces (flat)
    output [OUTPUT_PORTS*FLIT_WIDTH-1:0] out_flit;
-   output [OUTPUT_PORTS*VCHANNELS-1:0] 	out_valid;
-   input [OUTPUT_PORTS*VCHANNELS-1:0] 	out_ready;
+   output [OUTPUT_PORTS*VCHANNELS-1:0]  out_valid;
+   input [OUTPUT_PORTS*VCHANNELS-1:0]   out_ready;
 
    // Input interfaces (flat)
-   input [INPUT_PORTS*FLIT_WIDTH-1:0] 	in_flit;
-   input [INPUT_PORTS*VCHANNELS-1:0] 	in_valid;
-   output [INPUT_PORTS*VCHANNELS-1:0] 	in_ready;
-   
+   input [INPUT_PORTS*FLIT_WIDTH-1:0]   in_flit;
+   input [INPUT_PORTS*VCHANNELS-1:0]    in_valid;
+   output [INPUT_PORTS*VCHANNELS-1:0]   in_ready;
+
    // Array conversion
-   wire [FLIT_WIDTH-1:0] 		out_flit_array [0:OUTPUT_PORTS-1];
-   wire [VCHANNELS-1:0] 		out_valid_array [0:OUTPUT_PORTS-1];
-   wire [VCHANNELS-1:0] 		out_ready_array [0:OUTPUT_PORTS-1];
-   
-   wire [FLIT_WIDTH-1:0] 		in_flit_array [0:INPUT_PORTS-1];
-   wire [VCHANNELS-1:0] 		in_valid_array [0:INPUT_PORTS-1];
-   wire [VCHANNELS-1:0] 		in_ready_array [0:INPUT_PORTS-1];
+   wire [FLIT_WIDTH-1:0]                out_flit_array [0:OUTPUT_PORTS-1];
+   wire [VCHANNELS-1:0]                 out_valid_array [0:OUTPUT_PORTS-1];
+   wire [VCHANNELS-1:0]                 out_ready_array [0:OUTPUT_PORTS-1];
+
+   wire [FLIT_WIDTH-1:0]                in_flit_array [0:INPUT_PORTS-1];
+   wire [VCHANNELS-1:0]                 in_valid_array [0:INPUT_PORTS-1];
+   wire [VCHANNELS-1:0]                 in_ready_array [0:INPUT_PORTS-1];
 
    genvar                 p;
    genvar                 op,v,ip;
@@ -134,15 +134,15 @@ module lisnoc_router( /*AUTOARG*/
          assign in_ready[(p+1)*VCHANNELS-1:p*VCHANNELS] = in_ready_array[p];
       end
    endgenerate
-     
+
    // Those are the switching wires
    wire [FLIT_WIDTH*VCHANNELS-1:0]   switch_in_flit[0:INPUT_PORTS-1];
    wire [OUTPUT_PORTS*VCHANNELS-1:0] switch_in_request[0:INPUT_PORTS-1];
    wire [OUTPUT_PORTS*VCHANNELS-1:0] switch_in_read[0:INPUT_PORTS-1];
-   
+
    wire [FLIT_WIDTH*VCHANNELS*INPUT_PORTS-1:0] switch_out_flit[0:OUTPUT_PORTS-1];
-   wire [INPUT_PORTS*VCHANNELS-1:0] 	       switch_out_request[0:OUTPUT_PORTS-1];
-   wire [INPUT_PORTS*VCHANNELS-1:0] 	       switch_out_read[0:OUTPUT_PORTS-1];
+   wire [INPUT_PORTS*VCHANNELS-1:0]            switch_out_request[0:OUTPUT_PORTS-1];
+   wire [INPUT_PORTS*VCHANNELS-1:0]            switch_out_read[0:OUTPUT_PORTS-1];
 
    // Switch
    wire [FLIT_WIDTH*INPUT_PORTS*VCHANNELS-1:0] all_flits;
@@ -169,7 +169,7 @@ module lisnoc_router( /*AUTOARG*/
          end
       end
    endgenerate
-   
+
    generate
       for (p = 0; p < INPUT_PORTS; p = p + 1) begin : inputs
          /* lisnoc_router_input AUTO_TEMPLATE (
@@ -180,7 +180,7 @@ module lisnoc_router( /*AUTOARG*/
          .switch_flit    (switch_in_flit[p]),
          .switch_read    (switch_in_read[p]),
          );*/
-         
+
          lisnoc_router_input
             #(.vchannels(VCHANNELS),.ports(OUTPUT_PORTS),
                .num_dests(NUM_DESTS),.lookup(LOOKUP),.flit_data_width(FLIT_DATA_WIDTH),
@@ -210,7 +210,7 @@ module lisnoc_router( /*AUTOARG*/
          .switch_request (switch_out_request[p]),
          .switch_flit    (switch_out_flit[p]),
          );*/
-         
+
          lisnoc_router_output
 
          #(.vchannels(VCHANNELS),.ports(INPUT_PORTS),
@@ -231,7 +231,7 @@ module lisnoc_router( /*AUTOARG*/
                   .switch_flit          (switch_out_flit[p]));   // Templated
       end // block: outputs
    endgenerate
-      
+
 endmodule // lisnoc_router
 
 `include "lisnoc_undef.vh"

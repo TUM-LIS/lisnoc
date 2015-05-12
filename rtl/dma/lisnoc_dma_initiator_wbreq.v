@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * The wishbone master of the initiator.
- * 
+ *
  * (c) 2011-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -44,17 +44,17 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
    );
 
    input clk, rst;
-   
+
    input             wb_req_ack_i;
    output reg        wb_req_cyc_o, wb_req_stb_o;
-   output            wb_req_we_o; 
+   output            wb_req_we_o;
    input [31:0]      wb_req_dat_i;
    output [31:0]     wb_req_dat_o;
-   output reg [31:0]     wb_req_adr_o;
-   output reg [2:0]      wb_req_cti_o;
+   output reg [31:0] wb_req_adr_o;
+   output reg [2:0]  wb_req_cti_o;
    output [1:0]      wb_req_bte_o;
    output [3:0]      wb_req_sel_o;
-   
+
    input                                req_start;
    input                                req_is_l2r;
    input [`DMA_REQFIELD_SIZE_WIDTH-3:0] req_size;
@@ -70,14 +70,14 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
 `define WB_REQ_IDLE  2'b00
 `define WB_REQ_DATA  2'b01
 `define WB_REQ_WAIT  2'b10
-   
+
    // State logic
    reg [`WB_REQ_WIDTH-1:0] wb_req_state;
    reg [`WB_REQ_WIDTH-1:0] nxt_wb_req_state;
 
    // Counter for the state machine for loaded words
    reg [`DMA_REQFIELD_SIZE_WIDTH-3:0] wb_req_count;
-   reg [`DMA_REQFIELD_SIZE_WIDTH-3:0] nxt_wb_req_count; 
+   reg [`DMA_REQFIELD_SIZE_WIDTH-3:0] nxt_wb_req_count;
 
    /*
     * The wishbone data fetch and the NoC interface are seperated by a FIFO.
@@ -85,7 +85,7 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
     * the timing of the NoC side and the wishbone side (in terms of termination).
     */
 
-   // The intermediate store a FIFO of three elements 
+   // The intermediate store a FIFO of three elements
    //
    // There should be no combinatorial path from input to output, so
    // that it takes one cycle before the wishbone interface knows
@@ -93,7 +93,7 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
    // interface needs one extra cycle for burst termination. The data
    // should be stored and not discarded. Finally, there is one
    // element in the FIFO that is the normal timing decoupling.
-   
+
    reg [31:0]                          data_fifo [0:2]; // data storage
    wire                                data_fifo_pop;   // NoC pops
    reg                                 data_fifo_push;  // WB pushes
@@ -102,7 +102,7 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
    wire [31:0]                         data_fifo_in;  // Push element
     // Shift register for current position (4th bit is full mark)
    reg [3:0]                           data_fifo_pos;
-   
+
    wire        data_fifo_empty; // FIFO empty
    wire        data_fifo_ready; // FIFO accepts new elements
 
@@ -110,14 +110,14 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
    assign data_fifo_pop = req_data_ready;
    assign req_data_valid = ~data_fifo_empty;
    assign req_data = data_fifo_out;
-     
+
    assign data_fifo_empty = data_fifo_pos[0]; // Empty when pushing to first one
    assign data_fifo_out = data_fifo[0]; // First element is out
 
    // FIFO is not ready when back-pressure would result in discarded data,
    // that is, we need one store element (high-water).
    assign data_fifo_ready = ~|data_fifo_pos[3:2];
-   
+
    // FIFO position pointer logic
    always @(posedge clk) begin
       if (rst) begin
@@ -128,7 +128,7 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
             data_fifo_pos <= data_fifo_pos << 1;
          end else if (~data_fifo_push & data_fifo_pop) begin
             // pop and no push
-            data_fifo_pos <= data_fifo_pos >> 1;            
+            data_fifo_pos <= data_fifo_pos >> 1;
          end else begin
             // * no push or pop or
             // * both push and pop
@@ -163,25 +163,25 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
             data_fifo[i] <= data_fifo[i];
          end
       end
-   end     
+   end
 
    //
    // Wishbone interface logic
    //
-   
+
    // Statically zero (this interface reads)
    assign wb_req_dat_o = 32'h0000_0000;
    assign wb_req_we_o = 1'b0;
 
    // We only support full (aligned) word transfers
-   assign wb_req_sel_o = 4'b1111; 
+   assign wb_req_sel_o = 4'b1111;
 
    // We only need linear bursts
    assign wb_req_bte_o = 2'b00;
 
    // The input to the fifo is the data from the bus
    assign data_fifo_in = wb_req_dat_i;
-   
+
    // Next state, wishbone combinatorial signals and counting
    always @(*) begin
       // Signal defaults
@@ -193,13 +193,13 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
       wb_req_adr_o = 32'hx;
       wb_req_cti_o = 3'b000;
 
-      case (wb_req_state) 
+      case (wb_req_state)
         `WB_REQ_IDLE: begin
            // We are idle'ing
 
            // Always reset counter
            nxt_wb_req_count = 0;
-           
+
            if (req_start & req_is_l2r)
              // start when new request is handled and it is a L2R
              // request. Direct transition to data fetching from bus,
@@ -277,7 +277,7 @@ module lisnoc_dma_initiator_wbreq(/*AUTOARG*/
          wb_req_count <= nxt_wb_req_count;
       end
    end
-   
+
 
 endmodule // lisnoc_dma_initiator_wbreq
 

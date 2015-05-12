@@ -1,7 +1,7 @@
 `include "lisnoc_def.vh"
 
 module ${emit(modulename)}$
-  ( 
+  (
 ${for p in range(0,xdim*ydim):}$
     link${emit(p)}$_in_flit_i, link${emit(p)}$_in_valid_i, link${emit(p)}$_in_ready_o,
     link${emit(p)}$_out_flit_o, link${emit(p)}$_out_valid_o, link${emit(p)}$_out_ready_i,

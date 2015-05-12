@@ -19,11 +19,11 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This module is an input port. It instantiates a FIFO and a decode module
  * for each virtual channel and aggregates the interfaces.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  * TODO:
@@ -49,7 +49,7 @@ module lisnoc_router_input( /*AUTOARG*/
    parameter ports = 5;
 
    parameter fifo_length = 4;
-   
+
    // The number of destinations is a parameter of each port.
    // It should in general be equal for all routers in a NoC and
    // must be within the range defined by FLIT_DEST_WIDTH.
@@ -63,7 +63,7 @@ module lisnoc_router_input( /*AUTOARG*/
 
    // Generic stuff
    input clk, rst;
-   
+
    // The link interface
    input [flit_width-1:0] link_flit;  // current flit
    input [vchannels-1:0]   link_valid; // current valid for which channel
@@ -79,7 +79,7 @@ module lisnoc_router_input( /*AUTOARG*/
    wire [ports-1:0]                   switch_read_array [0:vchannels-1];
 
    genvar v;
-  
+
    generate
       for (v=0;v<vchannels;v=v+1) begin: vchannel
          wire                   fifo_valid;
@@ -89,7 +89,7 @@ module lisnoc_router_input( /*AUTOARG*/
          assign switch_request[(v+1)*ports-1:v*ports] = switch_request_array[v];
          assign switch_flit[(v+1)*flit_width-1:v*flit_width] = switch_flit_array[v];
          assign switch_read_array[v] = switch_read[(v+1)*ports-1:v*ports];
-         
+
          /* lisnoc_fifo AUTO_TEMPLATE (
           .in_ready  (link_ready[v]),
           .out_flit  (fifo_flit[flit_width-1:0]),
@@ -98,7 +98,7 @@ module lisnoc_router_input( /*AUTOARG*/
           .in_valid  (link_valid[v]),
           .out_ready (fifo_ready),
           ); */
-         lisnoc_fifo #(.LENGTH(fifo_length),.flit_data_width(flit_data_width), 
+         lisnoc_fifo #(.LENGTH(fifo_length),.flit_data_width(flit_data_width),
          .flit_type_width(flit_type_width))
            fifo (/*AUTOINST*/
                  // Outputs
@@ -114,7 +114,7 @@ module lisnoc_router_input( /*AUTOARG*/
 
          lisnoc_router_input_route
            # (.num_dests(num_dests),.lookup(lookup),
-              .flit_data_width(flit_data_width),.flit_type_width(flit_type_width), 
+              .flit_data_width(flit_data_width),.flit_type_width(flit_type_width),
          .ph_dest_width(ph_dest_width), .directions(ports))
          route(// Outputs
                 .fifo_ready     (fifo_ready),
@@ -126,11 +126,11 @@ module lisnoc_router_input( /*AUTOARG*/
                 .switch_read    (switch_read_array[v]),
                 .fifo_flit      (fifo_flit),
                 .fifo_valid     (fifo_valid));
- 
+
       end // for (i=0;i<vchannels;i=i+1)
-      
+
    endgenerate
-   
+
 endmodule // noc_router_input
 
 `include "lisnoc_undef.vh"

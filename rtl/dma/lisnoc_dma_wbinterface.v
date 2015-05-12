@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * The wishbone slave interface to configure the DMA module.
- * 
+ *
  * (c) 2011-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -46,9 +46,9 @@ module lisnoc_dma_wbinterface(/*AUTOARG*/
    localparam table_entries_ptrwidth = 2;
 
    parameter tileid = 0; // TODO: remove
-   
+
    input clk,rst;
-   
+
    input [31:0]             wb_if_adr_i;
    input [31:0]             wb_if_dat_i;
    input                    wb_if_cyc_i;
@@ -56,12 +56,12 @@ module lisnoc_dma_wbinterface(/*AUTOARG*/
    input                    wb_if_we_i;
    output reg [31:0]        wb_if_dat_o;
    output                   wb_if_ack_o;
-   
+
    output [`DMA_REQUEST_WIDTH-1:0]     if_write_req;
    output [table_entries_ptrwidth-1:0] if_write_pos;
    output [`DMA_REQMASK_WIDTH-1:0]     if_write_select;
    output                              if_write_en;
-   
+
    // Interface read (status) interface
    output [table_entries_ptrwidth-1:0]    if_valid_pos;
    output                                 if_valid_set;
@@ -91,7 +91,7 @@ module lisnoc_dma_wbinterface(/*AUTOARG*/
          wb_if_dat_o = {31'h0,done[if_valid_pos]};
       end
    end
-   
+
    genvar  i;
    // This assumes, that mask and address match
    generate
@@ -99,7 +99,7 @@ module lisnoc_dma_wbinterface(/*AUTOARG*/
          assign if_write_select[i] = (wb_if_adr_i[4:2] == i);
       end
    endgenerate
-   
+
 endmodule // lisnoc_dma_wbinterface
 
 `include "lisnoc_dma_undef.vh"

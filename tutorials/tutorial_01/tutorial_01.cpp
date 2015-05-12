@@ -5,7 +5,7 @@
 int main(int argc, char **argv, char **env) {
   int i;
   int clk;
-    
+
   Vtutorial_01 top;
 
   Verilated::traceEverOn(true);
@@ -15,7 +15,7 @@ int main(int argc, char **argv, char **env) {
 
   top.clk = 1;
   top.rst = 0;
-  
+
   for (i=0; i<100; i++) {
     top.rst = (i < 4);
 
@@ -29,6 +29,6 @@ int main(int argc, char **argv, char **env) {
   }
 
   tf.close();
-  
+
   exit(0);
 }

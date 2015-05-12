@@ -12,7 +12,7 @@ class LISNoCGenerator:
         self.xdim = int(xdim)
         self.ydim = int(ydim)
         self.vc = int(vc)
-    
+
     def generate(self,module=None):
         if module==None:
             if self.vc > 0:
@@ -51,13 +51,13 @@ if __name__ == '__main__':
     if len(sys.argv) < 3:
         print "Usage: lisnoc_generate.py <xdim> <ydim> [<vc>]"
         exit(1)
-    
+
     xdim = sys.argv[1]
     ydim = sys.argv[2]
     if len(sys.argv)>3:
         vc = sys.argv[3]
     else:
         vc = 0
-        
+
     generator = LISNoCGenerator(xdim,ydim,vc)
     generator.generate()

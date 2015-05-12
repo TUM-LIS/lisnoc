@@ -19,10 +19,10 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
- * This is the prio decoder. 
- * 
- * Author(s): 
+ *
+ * This is the prio decoder.
+ *
+ * Author(s):
  *   Manuel Krause <krause.maxen@freenet.de>
  *
  */
@@ -30,10 +30,10 @@
 `include "lisnoc_def.vh"
 module lisnoc_router_arbiter_prio(
                                   // Inputs
-                                  clk, rst, flit_i, request_i, ready_i,  
+                                  clk, rst, flit_i, request_i, ready_i,
                                   // Outputs
                                   flit_o,read_o,valid_o);
-   
+
    /////////////////////////////////////////////////////////////////////////
    //                             DECLARATIONS                            //
    /////////////////////////////////////////////////////////////////////////
@@ -44,11 +44,11 @@ module lisnoc_router_arbiter_prio(
 
    parameter  ph_prio_width = 4;
    parameter  ph_prio_offset = 5;
-   
-   parameter  vchannels = 1; 
+
+   parameter  vchannels = 1;
    parameter  ports = 5;
    parameter  port_width = $clog2(ports);
-   
+
    // Clock and Reset declaration
    input clk;
    input rst;
@@ -60,10 +60,10 @@ module lisnoc_router_arbiter_prio(
    output [flit_width-1:0]      flit_o;                                       // output flit
    output reg [ports-1:0]       read_o;                                       // input arbiter select signal
    output reg                   valid_o;                                      // fifo read enable
-   
+
    // Register declaration
    reg [ph_prio_width-1:0]      flit_prio_field_mem [ports-1:0];              // prio field memory
-   reg [ports-1:0]              mem_status;                                   // cell status of the prio field memory  
+   reg [ports-1:0]              mem_status;                                   // cell status of the prio field memory
    reg [ports-1:0]              highest_prio_field  [ph_prio_width-1:0];      // rearranged prio.
    reg [ports-1:0]              prio_req_masked;                              // current highest prio jobs or empty
    reg [ph_prio_width-1:0]      nxt_flit_prio_field_mem [ports-1:0];          // look ahead flit prio field
@@ -75,17 +75,17 @@ module lisnoc_router_arbiter_prio(
 
    // Wire declaration
    wire [flit_width-1:0]        flit_array [0:ports-1];                       // flit data in array representation
-   wire [ph_prio_width-1:0]     flit_prio_field [ports-1:0];                  // prio field from each filt 
+   wire [ph_prio_width-1:0]     flit_prio_field [ports-1:0];                  // prio field from each filt
    wire [ph_prio_width-1:0]     highest_prio;                                 // highest prio.
    wire [flit_type_width-1:0]   flit_type;                                    // flit type field of current used port
    wire [ports-1:0]             active_port;                                  // current selected port in one hot representation
    wire [ports-1:0]             request;                                      // rename of input request_i
    wire                         ready;                                        // rename of input ready_i
-   
+
    // Signal assignments for better readability
    assign request = request_i;
    assign ready   = ready_i;
-   
+
    genvar                       p;
    generate
       for (p=0;p<ports;p=p+1) begin: Nam0
@@ -94,11 +94,11 @@ module lisnoc_router_arbiter_prio(
       end
    endgenerate
    /////////////////////////////////////////////////////////////////////////
-   
+
    /////////////////////////////////////////////////////////////////////////
    //                       FLIT PRIO DECODING LOGIC                      //
    /////////////////////////////////////////////////////////////////////////
-   // Rearrange all prioritization bits => switch from n x 4 bit wires to 4 x n bit wires 
+   // Rearrange all prioritization bits => switch from n x 4 bit wires to 4 x n bit wires
    always @(*) begin: decoding1
       integer index;
       integer p;
@@ -111,7 +111,7 @@ module lisnoc_router_arbiter_prio(
                end else begin
                   highest_prio_field[index][p] = 1'b0;
                end
-               
+
                // otherwise we use the current waiting one which has a request to our output port
             end else begin
                if (flit_prio_field[p][ph_prio_width-1]== 1'b1 && request[p] == 1'b1) begin
@@ -123,52 +123,52 @@ module lisnoc_router_arbiter_prio(
          end
       end
    end
-   
+
    // Reduces highest_prioritization_field to highest_prioritization => 4 n bit wires to 4 1 bit wires
    genvar index;
-   generate 
+   generate
       for (index=0;index<ph_prio_width;index=index+1) begin: Nam3
          assign highest_prio[index] = | highest_prio_field[index];
       end
    endgenerate
-   
+
    // Build new request mask from ports with highest prioritization and active prio-bit
    always @(*) begin: decoding2
       integer p;
       for (p=0;p<ports;p=p+1) begin: Nam4
          if (mem_status[p] == 1'b1) begin
-            prio_req_masked[p] = (&(highest_prio ~^ flit_prio_field_mem[p])) && request[p]; 
+            prio_req_masked[p] = (&(highest_prio ~^ flit_prio_field_mem[p])) && request[p];
          end else begin
             // If prio bit false compare with 4'b0000
             if (flit_prio_field[p][ph_prio_width-1] == 1'b0) begin
-               prio_req_masked[p] = (&(highest_prio ~^ {ph_prio_width{1'b0}})) && request[p]; 
+               prio_req_masked[p] = (&(highest_prio ~^ {ph_prio_width{1'b0}})) && request[p];
                //...otherwise compare with field
             end else begin
-               prio_req_masked[p] = (&(highest_prio ~^ flit_prio_field[p]))    && request[p]; 
+               prio_req_masked[p] = (&(highest_prio ~^ flit_prio_field[p]))    && request[p];
             end
-         end 
+         end
       end
    end
    /////////////////////////////////////////////////////////////////////////
-   
+
    /////////////////////////////////////////////////////////////////////////
    //                         LOOK AHEAD LOGIC                            //
    /////////////////////////////////////////////////////////////////////////
    always @(*) begin : store_and_increment
       integer i;
       for (i=0;i<ports;i=i+1) begin
-         
+
          if (request[i] == 1'b1) begin
             // Check if this field corresponds to the current port
             if (active_port[i] == 1'b1) begin
                nxt_mem_status[i]          = 1'b0;
-               nxt_flit_prio_field_mem[i] = {ph_prio_width{1'b0}};  
-               
+               nxt_flit_prio_field_mem[i] = {ph_prio_width{1'b0}};
+
                //...or to a waiting one.
             end else begin
                // If the request is not new then
                if (mem_status[i] == 1'b1) begin
-                  
+
                   nxt_mem_status[i] = 1'b1;
                   // Check if no prio bit is set
                   if (flit_prio_field_mem[i][ph_prio_width-1] == 1'b0) begin
@@ -177,8 +177,8 @@ module lisnoc_router_arbiter_prio(
                   end else begin
                      nxt_flit_prio_field_mem[i] = {1'b1,flit_prio_field_mem[i][ph_prio_width-1:1]};
                   end
-                  
-                  //...otherwise its a new request.      
+
+                  //...otherwise its a new request.
                end else begin
                   nxt_mem_status[i] = 1'b1;
                   // If no prio then store the lowest one
@@ -188,29 +188,29 @@ module lisnoc_router_arbiter_prio(
                   end else begin
                      nxt_flit_prio_field_mem[i] = flit_prio_field[i][ph_prio_width-1:0];
                   end
-                  
+
                end
-            end 
-            
+            end
+
             //...otherwise store zero.
          end else begin
             nxt_mem_status[i]          = 1'b0;
-            nxt_flit_prio_field_mem[i] = {ph_prio_width{1'b0}};  
+            nxt_flit_prio_field_mem[i] = {ph_prio_width{1'b0}};
          end
-      end    
+      end
    end
    /////////////////////////////////////////////////////////////////////////
-   
+
    /////////////////////////////////////////////////////////////////////////
    //                        ROUND ROBIN ARBITER                          //
    /////////////////////////////////////////////////////////////////////////
-   lisnoc_arb_prio_rr #(.N(ports)) 
+   lisnoc_arb_prio_rr #(.N(ports))
    u_arb(  .nxt_gnt(active_port),           // active port
            .req    (req_ports),             // requested ports
            .gnt    (old_port)               // last port
-           );            
+           );
    /////////////////////////////////////////////////////////////////////////
-      
+
    /////////////////////////////////////////////////////////////////////////
      //                           REQUEST MUX                               //
      /////////////////////////////////////////////////////////////////////////
@@ -219,15 +219,15 @@ module lisnoc_router_arbiter_prio(
            req_buffer = {ports{1'b0}};
         end else begin
            if ((flit_type == `FLIT_TYPE_HEADER) && (ready == 1'b1) && (request[select_port_num] == 1'b1)) begin
-              req_buffer = prio_req_masked; 
-           end else if ((flit_type == `FLIT_TYPE_SINGLE || flit_type == `FLIT_TYPE_LAST) && (ready == 1'b1) && (request[select_port_num] == 1'b1)) begin   
+              req_buffer = prio_req_masked;
+           end else if ((flit_type == `FLIT_TYPE_SINGLE || flit_type == `FLIT_TYPE_LAST) && (ready == 1'b1) && (request[select_port_num] == 1'b1)) begin
               req_buffer = {ports{1'b0}};
            end else begin
               req_buffer = req_buffer;
            end
         end
      end
-   
+
    always @(*) begin: req_mux
       if (|req_buffer == 1'b1) begin
          req_ports = req_buffer;
@@ -236,7 +236,7 @@ module lisnoc_router_arbiter_prio(
       end
    end
    /////////////////////////////////////////////////////////////////////////
-      
+
    /////////////////////////////////////////////////////////////////////////
    //                 ONE-HOT VECTOR TO UNSIGNED CONVERTION               //
    /////////////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ module lisnoc_router_arbiter_prio(
         end
      end
    /////////////////////////////////////////////////////////////////////////
-      
+
    /////////////////////////////////////////////////////////////////////////
      //                             OUTPUT LOGIC                            //
      /////////////////////////////////////////////////////////////////////////
@@ -259,7 +259,7 @@ module lisnoc_router_arbiter_prio(
       integer i;
       if (|active_port == 1'b1 && ready == 1'b1) begin
          for (i=0;i<ports;i=i+1) begin
-            if (i == select_port_num) begin 
+            if (i == select_port_num) begin
                read_o[i] = 1'b1;
             end else begin
                read_o[i] = 1'b0;
@@ -271,25 +271,25 @@ module lisnoc_router_arbiter_prio(
          valid_o = 1'b0;
       end
    end
-   
+
    // output flit data
    assign flit_o = flit_array[select_port_num];
    /////////////////////////////////////////////////////////////////////////
-   
+
    /////////////////////////////////////////////////////////////////////////
    //                    RESET & PORT TRANSITION LOGIC                    //
    /////////////////////////////////////////////////////////////////////////
    assign flit_type = flit_array[select_port_num][flit_width-1:flit_width-flit_type_width];
-   
+
    always @(posedge clk) begin : clk_logic
       integer i;
       if (rst) begin
-         old_port    <= {ports{1'b0}};        
+         old_port    <= {ports{1'b0}};
          mem_status  <= {ports{1'b0}};
          for (i=0;i<ports;i=i+1) begin
             flit_prio_field_mem[i] <= {ph_prio_width{1'b0}};
          end
-         
+
       end else begin
          if ((flit_type == `FLIT_TYPE_SINGLE || flit_type == `FLIT_TYPE_LAST) && (ready == 1'b1) && (request[select_port_num] == 1'b1)) begin
             for (i=0;i<ports;i=i+1) begin

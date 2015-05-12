@@ -66,12 +66,12 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
    // NoC interface
    output reg [noc_flit_width-1:0] noc_out_flit;
-   output reg 			   noc_out_valid;
-   input 			   noc_out_ready;
+   output reg                      noc_out_valid;
+   input                           noc_out_ready;
 
    input [noc_flit_width-1:0] noc_in_flit;
    input                      noc_in_valid;
-   output reg 		      noc_in_ready;
+   output reg                 noc_in_ready;
 
    // Bus side (generic)
    input [5:0]                     bus_addr;
@@ -93,8 +93,8 @@ module lisnoc_mp_simple(/*AUTOARG*/
    wire                        in_valid;
    wire [noc_flit_width-1:0]   in_flit;
 
-   reg 			       enabled;
-   reg 			       nxt_enabled;
+   reg                         enabled;
+   reg                         nxt_enabled;
 
    assign irq = in_valid;
 
@@ -110,11 +110,11 @@ module lisnoc_mp_simple(/*AUTOARG*/
       end
    endgenerate
 
-   reg 	      if_fifo_in_en;
-   reg 	      if_fifo_in_ack;
+   reg        if_fifo_in_en;
+   reg        if_fifo_in_ack;
    reg [31:0] if_fifo_in_data;
-   reg 	      if_fifo_out_en;
-   reg 	      if_fifo_out_ack;
+   reg        if_fifo_out_en;
+   reg        if_fifo_out_ack;
 
    /*
     * +------+---+------------------------+
@@ -137,31 +137,31 @@ module lisnoc_mp_simple(/*AUTOARG*/
       if_fifo_out_en = 1'b0;
 
       if (bus_en) begin
-	 if (bus_addr[5:2] == 4'h0) begin
-	    if (!bus_we) begin
-	       if_fifo_in_en = 1'b1;
-	       bus_ack = if_fifo_in_ack;
-	       bus_data_out = if_fifo_in_data;
-	    end else begin
-	       if_fifo_out_en = 1'b1;
-	       bus_ack = if_fifo_out_ack;
-	    end
-	 end else if (bus_addr[5:2] == 4'h1) begin
-	    bus_ack = 1'b1;
-	    if (bus_we) begin
-	       nxt_enabled = 1'b1;
-	    end else begin
-	       bus_data_out = {30'h0, noc_out_valid, in_valid};
-	    end
-	 end
+         if (bus_addr[5:2] == 4'h0) begin
+            if (!bus_we) begin
+               if_fifo_in_en = 1'b1;
+               bus_ack = if_fifo_in_ack;
+               bus_data_out = if_fifo_in_data;
+            end else begin
+               if_fifo_out_en = 1'b1;
+               bus_ack = if_fifo_out_ack;
+            end
+         end else if (bus_addr[5:2] == 4'h1) begin
+            bus_ack = 1'b1;
+            if (bus_we) begin
+               nxt_enabled = 1'b1;
+            end else begin
+               bus_data_out = {30'h0, noc_out_valid, in_valid};
+            end
+         end
       end // if (bus_en)
    end // always @ begin
 
    always @(posedge clk) begin
       if (rst) begin
-	 enabled <= 1'b0;
+         enabled <= 1'b0;
       end else begin
-	 enabled <= nxt_enabled;
+         enabled <= nxt_enabled;
       end
    end
 
@@ -234,7 +234,7 @@ module lisnoc_mp_simple(/*AUTOARG*/
            end
         end // case: IN_FLIT
         default: begin
-	   nxt_state_in = IN_IDLE;
+           nxt_state_in = IN_IDLE;
         end
       endcase
    end
@@ -376,16 +376,16 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
    reg [noc_flit_width-1:0] ingress_flit;
    reg                      ingress_valid;
-   wire 		    ingress_ready;
+   wire                     ingress_ready;
 
    wire [noc_flit_width-1:0] egress_flit;
    wire                      egress_valid;
-   reg 			     egress_ready;
+   reg                       egress_ready;
 
    reg [noc_flit_width-1:0]  control_flit;
    reg [noc_flit_width-1:0]  nxt_control_flit;
-   reg 			     control_pending;
-   reg 			     nxt_control_pending;
+   reg                       control_pending;
+   reg                       nxt_control_pending;
 
 
    always @(*) begin
@@ -396,52 +396,52 @@ module lisnoc_mp_simple(/*AUTOARG*/
 
       // Ingress part
       if (noc_in_valid & !control_pending) begin
-	 if ((noc_in_flit[33:32] == 2'b11) &&
-	     (noc_in_flit[26:24] == 3'b111 &&
-	      !noc_in_flit[0])) begin
-	    nxt_control_pending = 1'b1;
-	    nxt_control_flit[33:32] = 2'b11;
-	    nxt_control_flit[31:27] = noc_in_flit[23:19];
-	    nxt_control_flit[26:24] = 3'b111;
-	    nxt_control_flit[23:19] = noc_in_flit[31:27];
-	    nxt_control_flit[18:2] = 17'h0;
-	    nxt_control_flit[1] = enabled;
-	    nxt_control_flit[0] = 1'b1;
-	    ingress_valid = 1'b0;
-	 end else begin
-	    ingress_valid = noc_in_valid;
-	 end
+         if ((noc_in_flit[33:32] == 2'b11) &&
+             (noc_in_flit[26:24] == 3'b111 &&
+              !noc_in_flit[0])) begin
+            nxt_control_pending = 1'b1;
+            nxt_control_flit[33:32] = 2'b11;
+            nxt_control_flit[31:27] = noc_in_flit[23:19];
+            nxt_control_flit[26:24] = 3'b111;
+            nxt_control_flit[23:19] = noc_in_flit[31:27];
+            nxt_control_flit[18:2] = 17'h0;
+            nxt_control_flit[1] = enabled;
+            nxt_control_flit[0] = 1'b1;
+            ingress_valid = 1'b0;
+         end else begin
+            ingress_valid = noc_in_valid;
+         end
       end else begin // if (noc_in_valid & !control_pending)
-	 ingress_valid = noc_in_valid;
+         ingress_valid = noc_in_valid;
       end
 
       // Egress part
       if (egress_valid & ~egress_flit[33]) begin
-	 egress_ready = noc_out_ready;
-	 noc_out_valid = egress_valid;
-	 noc_out_flit = egress_flit;
+         egress_ready = noc_out_ready;
+         noc_out_valid = egress_valid;
+         noc_out_flit = egress_flit;
       end else if (control_pending) begin
-	 egress_ready = 1'b0;
-	 noc_out_valid = 1'b1;
-	 noc_out_flit = control_flit;
-	 if (noc_out_ready) begin
-	    nxt_control_pending = 1'b0;
-	 end
+         egress_ready = 1'b0;
+         noc_out_valid = 1'b1;
+         noc_out_flit = control_flit;
+         if (noc_out_ready) begin
+            nxt_control_pending = 1'b0;
+         end
       end else begin
-	 egress_ready = noc_out_ready;
-	 noc_out_valid = egress_valid;
-	 noc_out_valid = egress_valid;
-	 noc_out_flit = egress_flit;
+         egress_ready = noc_out_ready;
+         noc_out_valid = egress_valid;
+         noc_out_valid = egress_valid;
+         noc_out_flit = egress_flit;
       end
    end // always @ begin
 
    always @(posedge clk) begin
       if (rst) begin
-	 control_pending <= 1'b0;
-	 control_flit <= 34'hx;
+         control_pending <= 1'b0;
+         control_flit <= 34'hx;
       end else begin
-	 control_pending <= nxt_control_pending;
-	 control_flit <= nxt_control_flit;
+         control_pending <= nxt_control_pending;
+         control_flit <= nxt_control_flit;
       end
    end
 

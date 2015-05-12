@@ -19,9 +19,9 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This module is an output port.
- * 
+ *
  * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
@@ -50,7 +50,7 @@ module lisnoc_router_output (/*AUTOARG*/
    parameter ports = 5;
 
    parameter fifo_length = 4;
-   
+
    input clk, rst;
    output [flit_width-1:0] link_flit;  // current flit
    output [vchannels-1:0]   link_valid; // current valid for which channel
@@ -66,7 +66,7 @@ module lisnoc_router_output (/*AUTOARG*/
    wire [vchannels-1:0] ready;
 
    genvar               v,p;
-   
+
    for (v=0;v<vchannels;v=v+1) begin: vchannel
       wire [flit_width*ports-1:0] input_flits;
       wire [flit_width-1:0] arbiter_flit;
@@ -90,7 +90,7 @@ module lisnoc_router_output (/*AUTOARG*/
                             .flit_i                     (input_flits),
                             .request_i          (switch_request[(v+1)*ports-1:v*ports]),
                             .ready_i                    (fifo_ready));
-      
+
       end else if (use_prio == 1)begin
         lisnoc_router_arbiter_prio
         #(.vchannels(vchannels), .ports(ports),.flit_data_width(flit_data_width),.flit_type_width(flit_type_width),.ph_prio_width(ph_prio_width),
@@ -105,8 +105,8 @@ module lisnoc_router_output (/*AUTOARG*/
                             .flit_i                      (input_flits),
                             .request_i  (switch_request[(v+1)*ports-1:v*ports]),
                             .ready_i                    (fifo_ready));
-      end 
-      
+      end
+
       /* lisnoc_fifo AUTO_TEMPLATE (
        .in_ready  (fifo_ready),
        .out_flit  (flit[(v+1)*flit_width-1:v*flit_width]),
@@ -115,7 +115,7 @@ module lisnoc_router_output (/*AUTOARG*/
        .in_valid  (arbiter_valid),
        .out_ready (ready[v]),
        );*/
-      
+
       lisnoc_fifo #(.LENGTH(fifo_length),.flit_data_width(flit_data_width),
             .flit_type_width(flit_type_width))
          fifo (/*AUTOINST*/
@@ -128,9 +128,9 @@ module lisnoc_router_output (/*AUTOARG*/
                .rst                     (rst),
                .in_flit                 (arbiter_flit),          // Templated
                .in_valid                (arbiter_valid),         // Templated
-               .out_ready               (ready[v]));             // Templated 
+               .out_ready               (ready[v]));             // Templated
    end // block: vchannel
-   
+
    /* lisnoc_router_output_arbiter AUTO_TEMPLATE (
     .fifo_ready_o (ready),
     .link_valid_o (link_valid),
@@ -151,8 +151,8 @@ module lisnoc_router_output (/*AUTOARG*/
                      .rst               (rst),
                      .fifo_valid_i      (valid),                 // Templated
                      .fifo_flit_i       (flit),                  // Templated
-                     .link_ready_i      (link_ready));           // Templated 
-   
+                     .link_ready_i      (link_ready));           // Templated
+
 endmodule // noc_router_output
 
 `include "lisnoc_undef.vh"

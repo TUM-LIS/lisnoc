@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * The module behaving as target in DMA transfers.
- * 
+ *
  * (c) 2011-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -56,7 +56,7 @@ module lisnoc_dma_target (/*AUTOARG*/
    localparam STATE_R2L_GENHDR = 4'b0110;
    localparam STATE_R2L_GENADDR = 4'b0111;
    localparam STATE_R2L_DATA = 4'b1000;
-  
+
 
    //TODO: set nxt_wb_waiting = 1'b0 in certain states like idle, or genheader.
    // Not important since we just loose one cycle in the worst case

@@ -19,14 +19,14 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * The packet buffer is similar to a FIFO but does only signal a flit
  * at the output when a complete packet is in the buffer. This relaxes
  * backpressure problems that may arise.
- * 
+ *
  * (c) 2011-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -45,9 +45,9 @@ module lisnoc_packet_buffer(/*AUTOARG*/
 
    parameter  fifo_depth = 16;
    localparam size_width = clog2(fifo_depth+1);
-   
+
    localparam READY = 1'b0, BUSY = 1'b1;
-   
+
    //inputs
    input                   clk, rst;
    input [flit_width-1:0]  in_flit;
@@ -59,20 +59,20 @@ module lisnoc_packet_buffer(/*AUTOARG*/
    input                   out_ready;
 
    output reg [size_width-1:0] out_size;
-    
+
    // Signals for fifo
    reg [flit_width-1:0] fifo_data [0:fifo_depth]; //actual fifo
    reg [fifo_depth:0]   fifo_write_ptr;
 
    reg [fifo_depth:0]   last_flits;
-   
+
    wire                 full_packet;
    wire                 pop;
    wire                 push;
 
    wire [1:0] in_flit_type;
    assign in_flit_type = in_flit[flit_width-1:flit_width-2];
- 
+
    wire                        in_is_last;
    assign in_is_last = (in_flit_type == `FLIT_TYPE_LAST) || (in_flit_type == `FLIT_TYPE_SINGLE);
 
@@ -86,7 +86,7 @@ module lisnoc_packet_buffer(/*AUTOARG*/
          valid_flits[i] = fifo_write_ptr[i+1] | valid_flits[i+1];
       end
    end
-   
+
    assign full_packet = |(last_flits[fifo_depth-1:0] & valid_flits);
 
    assign pop = out_valid & out_ready;
@@ -104,7 +104,7 @@ module lisnoc_packet_buffer(/*AUTOARG*/
 
       s = 0;
       found = 0;
-      
+
       for (i=0;i<fifo_depth;i=i+1) begin
          if (last_flits[i] && !found) begin
             s = i+1;
@@ -113,7 +113,7 @@ module lisnoc_packet_buffer(/*AUTOARG*/
       end
       out_size = s;
    end
-   
+
    always @(posedge clk) begin
       if (rst) begin
          fifo_write_ptr <= {{fifo_depth{1'b0}},1'b1};
@@ -163,5 +163,5 @@ module lisnoc_packet_buffer(/*AUTOARG*/
            value = value>>1;
       end
    endfunction
-   
+
 endmodule

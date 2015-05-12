@@ -19,11 +19,11 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This is the arbiter for the link, that chooses one virtual channel
  * to transfer to the next hop.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Andreas Lankes <andreas.lankes@tum.de>
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
@@ -52,12 +52,12 @@ module lisnoc_router_output_arbiter(/*AUTOARG*/
 
    input                  clk, rst;
 
-   
+
    // fifo side
    input [vchannels-1:0]            fifo_valid_i;
    input [vchannels*flit_width-1:0] fifo_flit_i;
    output reg [vchannels-1:0]        fifo_ready_o;
-      
+
 
    output reg [vchannels-1:0]        link_valid_o;
    output [flit_width-1:0]           link_flit_o;
@@ -69,9 +69,9 @@ module lisnoc_router_output_arbiter(/*AUTOARG*/
 
    wire [vchannels-1:0]              serviceable;
    assign serviceable = (fifo_valid_i) & link_ready_i;
-   
+
    reg [CHANNEL_WIDTH-1:0]           channel;
-   
+
 
    reg [CHANNEL_WIDTH-1:0]           sel_channel;
    reg                               channel_selected;
@@ -81,34 +81,34 @@ module lisnoc_router_output_arbiter(/*AUTOARG*/
    for (v=0;v<vchannels;v=v+1) begin
       assign fifo_flit_i_array[v] = fifo_flit_i[(v+1)*flit_width-1:v*flit_width];
    end
-   
+
    assign link_flit_o = fifo_flit_i_array[channel];
 
    always @ (*) begin
       if (rst) begin
-         link_valid_o = {vchannels{1'b0}};      
+         link_valid_o = {vchannels{1'b0}};
          channel  = 3'b000;
          fifo_ready_o  = {vchannels{1'b0}};
       end else begin
          channel  = prev_channel;
          link_valid_o = {vchannels{1'b0}};
          fifo_ready_o  = {vchannels{1'b0}};
-         
+
          sel_channel = channel;
          channel_selected = 0;
-         
+
          repeat (vchannels) begin
             sel_channel = sel_channel + 1;
             if (sel_channel == vchannels)
                sel_channel = 0;
-            
+
             // check if we can serve this channel
             if (serviceable[sel_channel]) begin
                channel = sel_channel;
                channel_selected = 1;
-            end 
+            end
          end // repeat
-         
+
          if (channel_selected) begin
             link_valid_o[channel] = 1'b1;
             fifo_ready_o[channel] = 1'b1;
@@ -119,7 +119,7 @@ module lisnoc_router_output_arbiter(/*AUTOARG*/
    always @(posedge clk) begin
       prev_channel <= channel;
    end
-   
+
 endmodule // lisnoc_router_output_arbiter
 
 `include "lisnoc_undef.vh"

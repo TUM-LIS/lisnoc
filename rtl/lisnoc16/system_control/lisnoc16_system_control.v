@@ -19,10 +19,10 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This module can reset the cpus or the whole system.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Michael Tempelmeier <michael.tempelmeier@tum.de>
  */
 
@@ -44,17 +44,17 @@ module lisnoc16_system_control(/*AUTOARG*/
  //clk and rst
    input clk;
    input rst;
-   
+
  //noc-output
    output reg [`FLIT16_WIDTH-1:0] out_flit;  // data_out
    output reg                 out_valid; // data available
-   input                      out_ready; // read request  
+   input                      out_ready; // read request
 
-   
+
  //noc-input
    input [`FLIT16_WIDTH-1:0] in_flit;  // data_out
    input                   in_valid; // data available
-   output reg              in_ready; // read request    
+   output reg              in_ready; // read request
 
 //control signals
    output              rst_sys_dbg;
@@ -64,7 +64,7 @@ module lisnoc16_system_control(/*AUTOARG*/
    output              stop_cpu_dbg;
    output              start_cpu_dbg;
    output              stop_monitoring_dbg;
-   output              start_monitoring_dbg;   
+   output              start_monitoring_dbg;
 
 
    reg [`FLIT16_WIDTH -1 :0] sampled_flit;     // could be smaler; actually [`FLIT16_CONTENT_MSB:`FLIT16_CONTENT_LSB]
@@ -93,7 +93,7 @@ module lisnoc16_system_control(/*AUTOARG*/
       nxt_state = state;
       nxt_sampled_flit = sampled_flit;
       out_flit = {`FLIT16_WIDTH { 1'bX}};
-      
+
       case (state)
         `STATE_IDLE: begin
            in_ready = 1'b1;   // we can receive one flit
@@ -130,6 +130,6 @@ module lisnoc16_system_control(/*AUTOARG*/
          state = nxt_state;
       end
    end
-          
-   
+
+
 endmodule

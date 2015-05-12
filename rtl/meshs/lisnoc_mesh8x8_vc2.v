@@ -1,7 +1,7 @@
 `include "lisnoc_def.vh"
 
 module lisnoc_mesh8x8_vc2
-  ( 
+  (
 
     link0_in_flit_i, link0_in_valid_i, link0_in_ready_o,
     link0_out_flit_o, link0_out_valid_o, link0_out_ready_i,

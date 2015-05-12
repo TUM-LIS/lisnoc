@@ -38,9 +38,9 @@ module lisnoc16_usb_packet_buffer(/*AUTOARG*/
 
    parameter  fifo_depth = `MAX_NOC16_PACKET_LENGTH;
    localparam ptr_width  = $clog2(fifo_depth);
-   
+
    parameter READY = 1'b0, BUSY = 1'b1;
-   
+
    //inputs
    input                   clk, rst;
 
@@ -57,23 +57,23 @@ module lisnoc16_usb_packet_buffer(/*AUTOARG*/
 
    //
    output reg [`LD_MAX_NOC16_PACKET_LENGTH-1:0] next_last_flit_position;
-   
-   
-   
+
+
+
    // Signals for fifo
    reg [`FLIT16_WIDTH-1:0] fifo_data [0:fifo_depth]; //actual fifo
-   reg [fifo_depth:0] 	  fifo_write_ptr;
+   reg [fifo_depth:0]      fifo_write_ptr;
 
-   reg [fifo_depth:0]   last_flits;
-   
-   wire 		  full_packet;
-   wire 		  pop;
-   wire 		  push;
+   reg [fifo_depth:0]      last_flits;
+
+   wire                    full_packet;
+   wire                    pop;
+   wire                    push;
 
    wire [`FLIT16_TYPE_WIDTH-1:0] in_flit_type;
    assign in_flit_type = in_flit[`FLIT16_TYPE_MSB:`FLIT16_TYPE_LSB];
- 
-   wire 		       in_is_last;
+
+   wire                          in_is_last;
    assign in_is_last = (in_flit_type == `FLIT16_TYPE_LAST) || (in_flit_type == `FLIT16_TYPE_SINGLE);
 
    reg [fifo_depth-1:0]        valid_flits;
@@ -83,10 +83,10 @@ module lisnoc16_usb_packet_buffer(/*AUTOARG*/
       // Set first element
       valid_flits[fifo_depth-1] = fifo_write_ptr[fifo_depth];
       for (i=fifo_depth-2;i>=0;i=i-1) begin
-	 valid_flits[i] = fifo_write_ptr[i+1] | valid_flits[i+1];
+         valid_flits[i] = fifo_write_ptr[i+1] | valid_flits[i+1];
       end
    end
-   
+
    assign full_packet = |(last_flits & valid_flits);
 
    assign pop = out_valid & out_ready;
@@ -99,65 +99,64 @@ module lisnoc16_usb_packet_buffer(/*AUTOARG*/
 
    always @(posedge clk) begin
       if (rst) begin
-	 fifo_write_ptr <= {{fifo_depth{1'b0}},1'b1};
+         fifo_write_ptr <= {{fifo_depth{1'b0}},1'b1};
       end else if (push & !pop) begin
-	 fifo_write_ptr <= fifo_write_ptr << 1;
+         fifo_write_ptr <= fifo_write_ptr << 1;
       end else if (!push & pop) begin
-	 fifo_write_ptr <= fifo_write_ptr >> 1;
+         fifo_write_ptr <= fifo_write_ptr >> 1;
       end
    end
 
    always @(posedge clk) begin : shift_register
       if (rst) begin
-	 last_flits <= {fifo_depth+1{1'b0}};
+         last_flits <= {fifo_depth+1{1'b0}};
       end else begin : shift
-	 integer i;
-	 for (i=0;i<fifo_depth-1;i=i+1) begin
-	    if (pop) begin
-	       if (push & fifo_write_ptr[i+1]) begin
-		  fifo_data[i] <= in_flit;
-		  last_flits[i] <= in_is_last;
-	       end else begin
-		  fifo_data[i] <= fifo_data[i+1];
-		  last_flits[i] <= last_flits[i+1];
-	       end
-	    end else if (push & fifo_write_ptr[i]) begin
-	       fifo_data[i] <= in_flit;
-	       last_flits[i] <= in_is_last;
-	    end
-	 end // for (i=0;i<fifo_depth-1;i=i+1)
+         integer i;
+         for (i=0;i<fifo_depth-1;i=i+1) begin
+            if (pop) begin
+               if (push & fifo_write_ptr[i+1]) begin
+                  fifo_data[i] <= in_flit;
+                  last_flits[i] <= in_is_last;
+               end else begin
+                  fifo_data[i] <= fifo_data[i+1];
+                  last_flits[i] <= last_flits[i+1];
+               end
+            end else if (push & fifo_write_ptr[i]) begin
+               fifo_data[i] <= in_flit;
+               last_flits[i] <= in_is_last;
+            end
+         end // for (i=0;i<fifo_depth-1;i=i+1)
 
-	 // Handle last element
-	 if (pop &  push & fifo_write_ptr[i+1]) begin
-	    fifo_data[i] <= in_flit;
-	    last_flits[i] <= in_is_last;
-	 end else if (push & fifo_write_ptr[i]) begin
-	    fifo_data[i] <= in_flit;
-	    last_flits[i] <= in_is_last;
-	 end
+         // Handle last element
+         if (pop &  push & fifo_write_ptr[i+1]) begin
+            fifo_data[i] <= in_flit;
+            last_flits[i] <= in_is_last;
+         end else if (push & fifo_write_ptr[i]) begin
+            fifo_data[i] <= in_flit;
+            last_flits[i] <= in_is_last;
+         end
       end
    end // block: shift_register
 
 
 
-//find first in last!
+   //find first in last!
 
-always @(*) begin: find_first_one
-   integer i;
-   integer  not_done;
-   not_done = 1;
-   next_last_flit_position = 1;
-   
-   for (i=1; i<=`MAX_NOC16_PACKET_LENGTH; i = i+1) begin
-      //TODO: genau schaun ob das gut geht - sollte eigentlich schon.
-      if (not_done) begin
-	 if ((last_flits[i-1] == 1'b1) && valid_flits[i-1]) begin
-	    not_done = 0;
-	    next_last_flit_position = i;
-	 end
+   always @(*) begin: find_first_one
+      integer i;
+      integer  not_done;
+      not_done = 1;
+      next_last_flit_position = 1;
+
+      for (i=1; i<=`MAX_NOC16_PACKET_LENGTH; i = i+1) begin
+         //TODO: genau schaun ob das gut geht - sollte eigentlich schon.
+         if (not_done) begin
+            if ((last_flits[i-1] == 1'b1) && valid_flits[i-1]) begin
+               not_done = 0;
+               next_last_flit_position = i;
+            end
+         end
       end
-   end
-end // block: find_first_one	 
-   
+   end // block: find_first_one
 
 endmodule

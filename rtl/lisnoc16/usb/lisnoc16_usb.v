@@ -19,10 +19,10 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This is the toplevel-module of usb-to-noc and noc-to-usb conversion.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Michael Tempelmeier <michael.tempelmeier@tum.de>
  */
 
@@ -38,7 +38,7 @@ module lisnoc16_usb(/*AUTOARG*/
    fx_clk, fx_ctl, fpga_clk, rst, noc_in_flit, noc_in_valid,
    noc_out_ready
    );
-   
+
    parameter data_width = 16;
 
    //USB-Interface
@@ -55,13 +55,13 @@ module lisnoc16_usb(/*AUTOARG*/
    input [`FLIT16_WIDTH-1:0] noc_in_flit;
    input                     noc_in_valid;
    output                    noc_in_ready;
-   
+
    //NoC-OUT
    output [`FLIT16_WIDTH-1:0] noc_out_flit;
    output                     noc_out_valid;
    input                      noc_out_ready;
 
-   
+
    wire [data_width-1:0] in_data;
    wire                  in_ready;
    wire                  in_valid;
@@ -108,7 +108,7 @@ lisnoc16_usb_to_noc
   usb_to_noc(
              .clk(fpga_clk),
              .rst(rst),
-             
+
    //USB-Interface
              .in_usb_data(in_data),
              .in_usb_valid(in_valid),
@@ -124,8 +124,8 @@ lisnoc16_usb_from_noc  #(.fifo_depth(`MAX_NOC16_PACKET_LENGTH))
   usb_from_noc(
                .clk(fpga_clk),
                .rst(rst),
-             
-             //USB-Interface  
+
+             //USB-Interface
                .out_usb_data(out_data),
                .out_usb_valid(out_valid),
                .out_usb_ready(out_ready),
@@ -135,7 +135,7 @@ lisnoc16_usb_from_noc  #(.fifo_depth(`MAX_NOC16_PACKET_LENGTH))
                .in_noc_valid(noc_in_valid),
                .in_noc_ready(noc_in_ready)
                );
-   
+
 
 endmodule // lisnoc16_usb
 

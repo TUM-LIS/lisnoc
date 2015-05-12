@@ -19,10 +19,10 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This file implements the routing stage on the input ports.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
 
@@ -72,18 +72,18 @@ module lisnoc_router_input_route (/*AUTOARG*/
    // The aggregated read signal, because there is only one read reply
    wire   read;
    assign read = |switch_read;
-   
+
    // Internal state
    reg                      active;     // there is a transfer in progress
    wire                     nxt_active; // combinatorial input to transfer state
 
    reg [directions-1:0]     cur_select;     // This stores the current selection
    wire [directions-1:0]    nxt_cur_select; // combinational signal
-   
+
    // The lookup vector is generated for better code readability and
    // is in fact the lookup parameter in another representation
    wire [directions-1:0]    lookup_vector [0:num_dests-1];
-   
+
    // generate this representation
    genvar                   i;
    generate
@@ -92,18 +92,18 @@ module lisnoc_router_input_route (/*AUTOARG*/
          // the indexing is reversed (num_dests-i-1)!
          assign lookup_vector[num_dests-i-1] = lookup[(i+1)*directions-1:i*directions];
       end
-   endgenerate   
-   
+   endgenerate
+
    // Some bit selections for better readability below
    wire [1:0] flit_type;
    assign flit_type = fifo_flit[flit_width-1:flit_width-2];
-   
+
    wire [flit_data_width-1:0] flit_header;
    assign flit_header = fifo_flit[flit_data_width-1:0];
-   
+
    wire [ph_dest_width-1:0]     flit_dest;
    assign flit_dest = flit_header[flit_data_width-1:flit_data_width-ph_dest_width];
-   
+
    // Generating the current destination selection
    assign nxt_cur_select = ( // If there is no transfer we are waiting for or the active is finished ..
                              (~active || (active && read)) &&
@@ -112,14 +112,14 @@ module lisnoc_router_input_route (/*AUTOARG*/
                              // .. take selection from the lookup vector
                              ) ? lookup_vector[flit_dest] :
                            // take current value otherwise
-                           
+
                            cur_select;
 
    // Generate the request for the output
    assign nxt_switch_request =  // When the next cycle is an active route ..
                nxt_active ?
                // .. issue the current route request
-               nxt_cur_select 
+               nxt_cur_select
                // .. and nothing otherwise.
                : {directions{1'b0}};
 
@@ -136,7 +136,7 @@ module lisnoc_router_input_route (/*AUTOARG*/
    // The line below removes this, by simply signaling whether we in principle accept
    // new flits.
    // assign fifo_ready = ~active | read;
-   
+
    // Register stuff with the clock edge
    always @(posedge clk) begin
       if (rst) begin
@@ -148,7 +148,7 @@ module lisnoc_router_input_route (/*AUTOARG*/
          switch_request <= nxt_switch_request;
          active         <= nxt_active;
 
-         // Additionally check whether 
+         // Additionally check whether
          if ((active && read) || !active)
             switch_flit    <= fifo_flit;
          end

@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * The wishbone slave interface to access the simple message passing.
- * 
+ *
  * (c) 2012-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -43,7 +43,7 @@ module lisnoc_mp_simple_wb(/*AUTOARG*/
 
    parameter  fifo_depth = 16;
    localparam size_width = clog2(fifo_depth+1);
-   
+
    input clk;
    input rst;
 
@@ -65,7 +65,7 @@ module lisnoc_mp_simple_wb(/*AUTOARG*/
    output                     wb_ack_o;
 
    output                     irq;
-   
+
    // Bus side (generic)
    wire [5:0]                  bus_addr;
    wire                        bus_we;

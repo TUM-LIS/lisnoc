@@ -9,15 +9,15 @@ class poisson;
    real       pdf [];
    real       cdf [];
    integer    samples[];
-      
+
    function integer sample();
       sample=samples[$urandom_range(99)];
    endfunction // sample
-     
+
    function new(real mean=5);
       real sum;
       integer cur;
-      
+
       lambda = mean;
       pdf = new[$ceil(lambda*5)];
       pdf[0] = $exp(-1*lambda);
@@ -32,7 +32,7 @@ class poisson;
       for (int i=0;i<pdf.size();i++) begin
          pdf[i] = pdf[i]/sum;
       end
-      
+
       cdf = new[pdf.size()];
       cdf[0] = pdf[0];
       for (int i=1;i<cdf.size;i++) begin
@@ -50,7 +50,7 @@ class poisson;
       for (int i=0;i<100;i++) begin
 //         $display("%0d %0d",i,samples[i]);
       end
-   endfunction   
+   endfunction
 endclass // poisson
 
 `endif

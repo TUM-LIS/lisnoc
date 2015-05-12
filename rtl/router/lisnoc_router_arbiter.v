@@ -51,13 +51,13 @@ module lisnoc_router_arbiter (/*AUTOARG*/
 
    // switch side, receiving side
    input [flit_width*ports-1:0]  flit_i; // flit data from all input ports
-   input [ports-1:0] 		  request_i; // request signal from each vc of each input port
-   output reg [ports-1:0] 	  read_o; // select signal for each vc of each input port
+   input [ports-1:0]             request_i; // request signal from each vc of each input port
+   output reg [ports-1:0]        read_o; // select signal for each vc of each input port
 
    // FIFO side, output side
    output [flit_width-1:0] flit_o;
-   output reg 			valid_o;
-   input 			ready_i;
+   output reg              valid_o;
+   input                   ready_i;
 
    reg nxt_activeroute;
    reg activeroute;
@@ -70,10 +70,10 @@ module lisnoc_router_arbiter (/*AUTOARG*/
 
    wire [flit_width-1:0] flit_i_array [0:ports-1];
 
-   genvar 		  p;
+   genvar p;
    generate
       for (p=0;p<ports;p=p+1) begin
-	 assign flit_i_array[p] = flit_i[flit_width*(p+1)-1:flit_width*p];
+         assign flit_i_array[p] = flit_i[flit_width*(p+1)-1:flit_width*p];
       end
    endgenerate
 
@@ -83,7 +83,7 @@ module lisnoc_router_arbiter (/*AUTOARG*/
 
    assign flit_o = flit_i_array[portnum];
 
-   wire [ports-1:0] 	       req_masked;
+   wire [ports-1:0] req_masked;
    assign req_masked = {ports{~activeroute & ready_i}} & request_i;
 
    /* lisnoc_arb_rr AUTO_TEMPLATE(
@@ -94,11 +94,11 @@ module lisnoc_router_arbiter (/*AUTOARG*/
    lisnoc_arb_rr
       #(.N(ports))
       u_arb(/*AUTOINST*/
-         // Outputs
-         .nxt_gnt			(port),			 // Templated
-         // Inputs
-         .req				(req_masked),		 // Templated
-         .gnt				(activeport));		 // Templated
+            // Outputs
+            .nxt_gnt                    (port),                  // Templated
+            // Inputs
+            .req                        (req_masked),            // Templated
+            .gnt                        (activeport));            // Templated
 
 
    always @(*) begin : convertonehot

@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * Generic round robin arbiter.
- * 
+ *
  * (c) 2011-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -37,15 +37,15 @@ module lisnoc_arb_rr(/*AUTOARG*/
    );
 
    parameter N = 2;
-  
+
    input [N-1:0] req;
    input [N-1:0] gnt;
    output [N-1:0] nxt_gnt;
 
    reg [N-1:0]      mask [0:N-1];
-   
+
    integer            i,j;
-   
+
    always @(*) begin
       for (i=0;i<N;i=i+1) begin
          mask[i] = {N{1'b0}};

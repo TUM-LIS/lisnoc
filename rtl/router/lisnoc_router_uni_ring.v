@@ -53,19 +53,19 @@ module lisnoc_router_uni_ring( /*AUTOARG*/
    input clk, rst;
 
 
-   output [flit_width-1:0] ring_out_flit;
+   output [flit_width-1:0]  ring_out_flit;
    output [vchannels-1:0]   ring_out_valid;
    input [vchannels-1:0]    ring_out_ready;
 
-   input [flit_width-1:0]  ring_in_flit;
+   input [flit_width-1:0]   ring_in_flit;
    input [vchannels-1:0]    ring_in_valid;
    output [vchannels-1:0]   ring_in_ready;
 
    output [flit_width-1:0]  local_out_flit;
-   output [vchannels-1:0]    local_out_valid;
-   input [vchannels-1:0]   local_out_ready;
+   output [vchannels-1:0]   local_out_valid;
+   input [vchannels-1:0]    local_out_ready;
 
-   input [flit_width-1:0]  local_in_flit;
+   input [flit_width-1:0]   local_in_flit;
    input [vchannels-1:0]    local_in_valid;
    output [vchannels-1:0]   local_in_ready;
 

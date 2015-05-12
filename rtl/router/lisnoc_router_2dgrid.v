@@ -19,9 +19,9 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This is the 5-port router toplevel.
- * 
+ *
  * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  */
@@ -47,22 +47,22 @@ module lisnoc_router_2dgrid( /*AUTOARG*/
    parameter  flit_type_width = 2;
    localparam flit_width = flit_data_width+flit_type_width;
    parameter  ph_dest_width = 5;
-   parameter  num_dests = 16; 
-   
+   parameter  num_dests = 16;
+
    parameter use_prio = 0;
    parameter ph_prio_width = 4;
-     
+
    parameter vchannels = 2;
 
    localparam ports = 5;
 
    parameter in_fifo_length = 4;
-   parameter out_fifo_length = 4;   
-   
+   parameter out_fifo_length = 4;
+
    parameter [ports*num_dests-1:0] lookup = {num_dests{`SELECT_NONE}};
 
    input clk, rst;
-   
+
    output [flit_width-1:0] north_out_flit_o;
    output [vchannels-1:0]   north_out_valid_o;
    input [vchannels-1:0]    north_out_ready_i;
@@ -78,7 +78,7 @@ module lisnoc_router_2dgrid( /*AUTOARG*/
    output [flit_width-1:0] local_out_flit_o;
    output [vchannels-1:0]   local_out_valid_o;
    input [vchannels-1:0]    local_out_ready_i;
-   
+
    input [flit_width-1:0]  north_in_flit_i;
    input [vchannels-1:0]    north_in_valid_i;
    output [vchannels-1:0]   north_in_ready_o;
@@ -97,8 +97,8 @@ module lisnoc_router_2dgrid( /*AUTOARG*/
 
    /* lisnoc_router AUTO_TEMPLATE(
     .out_flit ({local_out_flit_o,west_out_flit_o,south_out_flit_o,east_out_flit_o,north_out_flit_o}),
-    .out_valid ({local_out_valid_o,west_out_valid_o,south_out_valid_o,east_out_valid_o,north_out_valid_o}),    
-    .out_ready ({local_out_ready_i,west_out_ready_i,south_out_ready_i,east_out_ready_i,north_out_ready_i}),    
+    .out_valid ({local_out_valid_o,west_out_valid_o,south_out_valid_o,east_out_valid_o,north_out_valid_o}),
+    .out_ready ({local_out_ready_i,west_out_ready_i,south_out_ready_i,east_out_ready_i,north_out_ready_i}),
     .in_flit ({local_in_flit_i,west_in_flit_i,south_in_flit_i,east_in_flit_i,north_in_flit_i}),
     .in_valid ({local_in_valid_i,west_in_valid_i,south_in_valid_i,east_in_valid_i,north_in_valid_i}),
     .in_ready ({local_in_ready_o,west_in_ready_o,south_in_ready_o,east_in_ready_o,north_in_ready_o}),
@@ -118,8 +118,8 @@ module lisnoc_router_2dgrid( /*AUTOARG*/
             .out_ready                  ({local_out_ready_i,west_out_ready_i,south_out_ready_i,east_out_ready_i,north_out_ready_i}), // Templated
             .in_flit                    ({local_in_flit_i,west_in_flit_i,south_in_flit_i,east_in_flit_i,north_in_flit_i}), // Templated
             .in_valid                   ({local_in_valid_i,west_in_valid_i,south_in_valid_i,east_in_valid_i,north_in_valid_i})); // Templated
-   
-   
+
+
 endmodule // lisnoc_2dgrid_router
 
 `include "lisnoc_undef.vh"

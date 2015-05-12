@@ -19,15 +19,15 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This module implements the round robin scheme.
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *   Andreas Lankes <andreas.lankes@tum.de>
  *
  */
- 
+
 `include "lisnoc_def.vh"
 
 module lisnoc_arb_prio_rr(/*AUTOARG*/
@@ -39,46 +39,46 @@ module lisnoc_arb_prio_rr(/*AUTOARG*/
 
    // Number of input ports in the design
    parameter N = 2;
-  
+
    // inputs
    input [N-1:0] req;
    input [N-1:0] gnt;
-   
+
    // outputs
    output reg [N-1:0] nxt_gnt;
 
    // registers
    reg [N-1:0] mask [0:N-1];
-   
-   
+
+
    // wires
    wire [N-1:0] nxt_gnt_tmp;
    wire [N-1:0] msr;
-   
+
    integer i,j;
-   
+
    always @(*) begin
       for (i=0;i<N;i=i+1) begin
-	      mask[i] = {N{1'b0}};
-	      
-	      if(i>0) begin 
-	         mask[i][i-1] = ~gnt[i-1];
-	      end else begin
-	         mask[i][N-1] = ~gnt[N-1];
-	      end
-	     	      
-	      for (j=2;j<N;j=j+1) begin
-	        if (i-j>=0) begin
-	          mask[i][i-j] = mask[i][i-j+1] & ~gnt[i-j];
-	        end else if(i-j+1>=0) begin
-	          mask[i][i-j+N] = mask[i][i-j+1] & ~gnt[i-j+N];
-	        end else begin
-	          mask[i][i-j+N] = mask[i][i-j+N+1] & ~gnt[i-j+N];
-	        end  
-	      end
+         mask[i] = {N{1'b0}};
+
+         if(i>0) begin
+            mask[i][i-1] = ~gnt[i-1];
+         end else begin
+            mask[i][N-1] = ~gnt[N-1];
+         end
+
+         for (j=2;j<N;j=j+1) begin
+            if (i-j>=0) begin
+               mask[i][i-j] = mask[i][i-j+1] & ~gnt[i-j];
+            end else if(i-j+1>=0) begin
+               mask[i][i-j+N] = mask[i][i-j+1] & ~gnt[i-j+N];
+            end else begin
+               mask[i][i-j+N] = mask[i][i-j+N+1] & ~gnt[i-j+N];
+            end
+         end
       end
    end
-   
+
    always @(*) begin
       if (|nxt_gnt_tmp == 1) begin
          nxt_gnt = nxt_gnt_tmp;
@@ -86,14 +86,14 @@ module lisnoc_arb_prio_rr(/*AUTOARG*/
          nxt_gnt = msr;
        end
    end
-     
+
    genvar k;
    generate
       for (k=0;k<N;k=k+1) begin: nxtGnt
-	       assign nxt_gnt_tmp[k] = (~|(mask[k] & req) & req[k]); 
+         assign nxt_gnt_tmp[k] = (~|(mask[k] & req) & req[k]);
       end
    endgenerate
-   
+
    generate
      for (k=0;k<N;k=k+1) begin: mostSignRequest
        if (k==0) begin
@@ -103,7 +103,7 @@ module lisnoc_arb_prio_rr(/*AUTOARG*/
        end
      end
    endgenerate
-   
+
 endmodule // lisnoc_arb_prio_rr
 
 `include "lisnoc_undef.vh"

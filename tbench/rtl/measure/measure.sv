@@ -11,7 +11,7 @@ module measure();
    // NoC dimension parameters
    parameter xdim = 4;
    parameter ydim = 4;
-   
+
    localparam nodes = xdim*ydim; // The number of nodes
 
    // The width of the links in the system
@@ -28,13 +28,13 @@ module measure();
    parameter select_router   = 0;
    localparam payload_length = (select_router == 3) ? 5 : 0;
    localparam out_fifo_len   = (select_router == 3) ? 8 : 4;
-   
+
    // Helper parameter that indicates whether hardware supports multicasts
    localparam mc_supported = (select_router < 2) ? 0 : 1;
 
    // Number of packets to simulate
    parameter numPackets = 10000;
-   
+
    // Traffic generator configuration
    parameter traffic = "*:uniform(0.15);5:uniform(0.05)";
 //   parameter traffic = "0:uniform(0.01,{1});1:uniform(0.1,{2});2:uniform(0.2,{15})";
@@ -42,7 +42,7 @@ module measure();
 //   parameter traffic = "5:multicast(0.01,{1-2-3-4-6-7-8-10-11-12},{1-2})";
 //   parameter traffic = "*:uniform(0.01,{*},{0-1});5:multicast(0.15,{1-2-3-4-6-7-8},{2-3})";
 //   parameter traffic = "*:uniform(0.01,{*},{0-1});*:multicast(0.01,{*},{2-3})";
-   
+
 
    // General flit format
    // +------+------------+
@@ -50,7 +50,7 @@ module measure();
    // +------+------------+
    //    |      |-> link width
    //    |-> 2 bit + 1 bit when multicast
-   
+
    parameter flit_data_width = link_width;
    parameter flit_type_width = 2+mc_supported;
    parameter flit_width = flit_data_width + flit_type_width;
@@ -64,7 +64,7 @@ module measure();
      #(.vchannels(vchannels),
        .flit_width(flit_width))
    links_out[0:nodes-1] (.clk(clk));
-   
+
    lisnoclink_if
      #(.vchannels(vchannels),
        .flit_width(flit_width))
@@ -121,5 +121,5 @@ module measure();
           .rst (rst),
           .links_out (links_in),
           .links_in  (links_out));
-   
+
 endmodule // measure

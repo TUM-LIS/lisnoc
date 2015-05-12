@@ -235,33 +235,32 @@ module lisnoc16_converter_32to16(/*AUTOARG*/
    lisnoc16_fifo
       #(.LENGTH(fifo_depth), .WIDTH(`FLIT16_DATA_WIDTH))
       buffer_H (.clk(clk),
-            .rst(rst),
-            //Output
-            .in_ready(in_ready_bH),
-            .out_flit(out_flit16_bH),
-            .out_valid(out_valid16_bH),
-            //Input
-            .in_flit(in_flit32_intern[31:16]),
-            .in_valid(in_valid32_intern),
-            .out_ready(pop_H)
-            );
+                .rst(rst),
+                //Output
+                .in_ready(in_ready_bH),
+                .out_flit(out_flit16_bH),
+                .out_valid(out_valid16_bH),
+                //Input
+                .in_flit(in_flit32_intern[31:16]),
+                .in_valid(in_valid32_intern),
+                .out_ready(pop_H));
 
 
  /***** VC-Multiplexer ******/
 
- lisnoc_vc_multiplexer
- 	#(.vchannels(vchannels_32),.flit_width(`FLIT32_WIDTH))
- 	vc_mux_32 (.clk(clk),
- 		.rst(rst),
+   lisnoc_vc_multiplexer
+      #(.vchannels(vchannels_32),.flit_width(`FLIT32_WIDTH))
+      vc_mux_32 (.clk(clk),
+                 .rst(rst),
 
- 		//extern
- 		.data_i(in_flit32),
- 		.valid_i(in_valid32),
- 		.ready_o(in_ready32),
+                 //extern
+                 .data_i(in_flit32),
+                 .valid_i(in_valid32),
+                 .ready_o(in_ready32),
 
- 		//intern
- 		.data_o(in_flit32_intern),
- 		.valid_o(in_valid32_intern),
- 		.ready_i(in_ready32_intern));
+                 //intern
+                 .data_o(in_flit32_intern),
+                 .valid_o(in_valid32_intern),
+                 .ready_i(in_ready32_intern));
 
-endmodule // lisnoc_32to16
+endmodule

@@ -1,7 +1,7 @@
 `include "lisnoc_def.vh"
 
 module lisnoc_mesh2x2_bl
-  ( 
+  (
 
     link0_in_flit_i, link0_in_valid_i,
     link0_out_flit_o, link0_out_valid_o,
@@ -15,9 +15,9 @@ module lisnoc_mesh2x2_bl
     link3_in_flit_i, link3_in_valid_i,
     link3_out_flit_o, link3_out_valid_o,
 
-    north_ready_for_local, 
+    north_ready_for_local,
     east_ready_for_local,
-    south_ready_for_local, 
+    south_ready_for_local,
     west_ready_for_local,
     local_ready_for_local,
     clk,
@@ -35,7 +35,7 @@ module lisnoc_mesh2x2_bl
 
    input clk;
    input rst;
-   
+
    input [flit_width-1:0] link0_in_flit_i;
    input [vchannels-1:0] link0_in_valid_i /*verilator sc_bv*/;
    output [flit_width-1:0] link0_out_flit_o;
@@ -58,34 +58,34 @@ module lisnoc_mesh2x2_bl
    input [vchannels-1:0] link3_in_valid_i /*verilator sc_bv*/;
    output [flit_width-1:0] link3_out_flit_o;
    output [vchannels-1:0] link3_out_valid_o /*verilator sc_bv*/;
-   
+
    output [3:0] north_ready_for_local;
    output [3:0] east_ready_for_local;
    output [3:0] south_ready_for_local;
    output [3:0] west_ready_for_local;
-   output [3:0] local_ready_for_local; 
+   output [3:0] local_ready_for_local;
 
 
    wire [flit_width-1:0] north_in_flit[0:1][0:1];
    wire [vchannels-1:0] north_in_valid[0:1][0:1];
    wire [flit_width-1:0] north_out_flit[0:1][0:1];
    wire [vchannels-1:0] north_out_valid[0:1][0:1];
-  
+
    wire [flit_width-1:0] east_in_flit[0:1][0:1];
    wire [vchannels-1:0] east_in_valid[0:1][0:1];
    wire [flit_width-1:0] east_out_flit[0:1][0:1];
    wire [vchannels-1:0] east_out_valid[0:1][0:1];
-   
+
    wire [flit_width-1:0] south_in_flit[0:1][0:1];
    wire [vchannels-1:0] south_in_valid[0:1][0:1];
    wire [flit_width-1:0] south_out_flit[0:1][0:1];
    wire [vchannels-1:0] south_out_valid[0:1][0:1];
-   
+
    wire [flit_width-1:0] west_in_flit[0:1][0:1];
    wire [vchannels-1:0] west_in_valid[0:1][0:1];
    wire [flit_width-1:0] west_out_flit[0:1][0:1];
    wire [vchannels-1:0] west_out_valid[0:1][0:1];
-   
+
 
 
    /* Connecting (0,0) */
@@ -195,7 +195,7 @@ module lisnoc_mesh2x2_bl
        .local_out_flit_o	(link1_out_flit_o[flit_width-1:0]),
        .local_out_valid_o	(link1_out_valid_o[vchannels-1:0]),
        .local_ready_for_local  (local_ready_for_local[1]),
-       
+
        .north_in_flit_i		(north_in_flit[0][1][flit_width-1:0]),
        .north_in_valid_i	(north_in_valid[0][1][vchannels-1:0]),
        .east_in_flit_i		(east_in_flit[0][1][flit_width-1:0]),
@@ -233,7 +233,7 @@ module lisnoc_mesh2x2_bl
        .local_out_flit_o	(link2_out_flit_o[flit_width-1:0]),
        .local_out_valid_o	(link2_out_valid_o[vchannels-1:0]),
        .local_ready_for_local  (local_ready_for_local[2]),
-       
+
        .north_in_flit_i		(north_in_flit[1][0][flit_width-1:0]),
        .north_in_valid_i	(north_in_valid[1][0][vchannels-1:0]),
        .east_in_flit_i		(east_in_flit[1][0][flit_width-1:0]),
@@ -269,7 +269,7 @@ module lisnoc_mesh2x2_bl
        .local_out_flit_o	(link3_out_flit_o[flit_width-1:0]),
        .local_out_valid_o	(link3_out_valid_o[vchannels-1:0]),
        .local_ready_for_local  (local_ready_for_local[3]),
-       
+
        .north_in_flit_i		(north_in_flit[1][1][flit_width-1:0]),
        .north_in_valid_i	(north_in_valid[1][1][vchannels-1:0]),
        .east_in_flit_i		(east_in_flit[1][1][flit_width-1:0]),

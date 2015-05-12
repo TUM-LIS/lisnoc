@@ -1,7 +1,7 @@
 interface lisnoclink_if(input clk);
    parameter flit_width = 34;
    parameter vchannels = 1;
-   
+
    logic [flit_width-1:0] flit;
    logic [vchannels-1:0]  ready;
    logic [vchannels-1:0]  valid;
@@ -10,7 +10,7 @@ interface lisnoclink_if(input clk);
       ready = 0;
       valid = 0;
    end
-   
+
    task send(input logic [flit_width-1:0] sflit,
              input integer vc);
       flit = sflit;
@@ -26,11 +26,11 @@ interface lisnoclink_if(input clk);
       @(negedge clk iff |valid);
       rflit = flit;
       @(posedge clk);
-      
-      ready = {vchannels{1'b0}};      
+
+      ready = {vchannels{1'b0}};
    endtask // receive
 
    modport tx(input flit,input valid,output ready);
-   modport rx(output flit,output valid,input ready);   
-   
+   modport rx(output flit,output valid,input ready);
+
 endinterface // noclink_if

@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * DMA transfer table
  * The DMA transfer table holds all requests and their corresponding
  * life-cycle between the interface and the control handler. To save
@@ -28,10 +28,10 @@
  * exception is the valid signal, that is a dedicated register for
  * each request. All request valid signals are also provided in an
  * output.
- * 
+ *
  * (c) 2011-2013 by the author(s)
- * 
- * Author(s): 
+ *
+ * Author(s):
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
  *
  */
@@ -52,7 +52,7 @@ module lisnoc_dma_request_table(/*AUTOARG*/
    localparam table_entries_ptrwidth = 2;
 
    parameter generate_interrupt = 1;
-   
+
    input clk, rst;
 
    // Interface write (request) interface
@@ -60,39 +60,39 @@ module lisnoc_dma_request_table(/*AUTOARG*/
    input [table_entries_ptrwidth-1:0] if_write_pos;
    input [`DMA_REQMASK_WIDTH-1:0]     if_write_select;
    input                              if_write_en;
-   
+
    input [table_entries_ptrwidth-1:0] if_valid_pos;
    input                              if_valid_set;
    input                              if_valid_en;
    input                              if_validrd_en;
-   
+
    // Control read (request) interface
    output [`DMA_REQUEST_WIDTH-1:0]    ctrl_read_req;
    input [table_entries_ptrwidth-1:0] ctrl_read_pos;
-   
+
    // Control write (status) interface
    input [table_entries_ptrwidth-1:0] ctrl_done_pos;
    input                              ctrl_done_en;
-   
+
    // All valid bits of the entries
    output [table_entries-1:0]         valid;
    output [table_entries-1:0]         done;
 
    output [table_entries-1:0] 	      irq;
-   
+
    // The storage of the requests ..
    reg [`DMA_REQUEST_WIDTH-1:0] transfer_request_table[0:table_entries-1];
-   
+
    reg [table_entries-1:0]      transfer_valid;
    reg [table_entries-1:0]      transfer_done;
-      
+
    wire [`DMA_REQUEST_WIDTH-1:0] if_write_mask;
    assign if_write_mask[`DMA_REQFIELD_LADDR_MSB:`DMA_REQFIELD_LADDR_LSB] = {`DMA_REQFIELD_LADDR_WIDTH{if_write_select[`DMA_REQMASK_LADDR]}};
    assign if_write_mask[`DMA_REQFIELD_SIZE_MSB:`DMA_REQFIELD_SIZE_LSB] = {`DMA_REQFIELD_SIZE_WIDTH{if_write_select[`DMA_REQMASK_SIZE]}};
    assign if_write_mask[`DMA_REQFIELD_RTILE_MSB:`DMA_REQFIELD_RTILE_LSB] = {`DMA_REQFIELD_RTILE_WIDTH{if_write_select[`DMA_REQMASK_RTILE]}};
    assign if_write_mask[`DMA_REQFIELD_RADDR_MSB:`DMA_REQFIELD_RADDR_LSB] = {`DMA_REQFIELD_RADDR_WIDTH{if_write_select[`DMA_REQMASK_RADDR]}};
    assign if_write_mask[`DMA_REQFIELD_DIR] = if_write_select[`DMA_REQMASK_DIR];
-   
+
    // Write to the request table
    always @(posedge clk) begin : proc_request_table
       integer i;
@@ -100,7 +100,7 @@ module lisnoc_dma_request_table(/*AUTOARG*/
          //reset
          for (i = 0; i < table_entries; i = i+1) begin
             { transfer_valid[i], transfer_done[i] } <= 2'b00;
-         end //for 
+         end //for
       end else begin
          if (if_write_en) begin
             transfer_request_table[if_write_pos] <= (~if_write_mask & transfer_request_table[if_write_pos]) | (if_write_mask & if_write_req);
@@ -122,10 +122,10 @@ module lisnoc_dma_request_table(/*AUTOARG*/
          end
       end
    end
-   
+
    // Read interface to the request table
    assign ctrl_read_req = transfer_request_table[ctrl_read_pos];
-   
+
    // Combine the valid and done bits to one signal
    genvar i;
    generate
@@ -137,9 +137,9 @@ module lisnoc_dma_request_table(/*AUTOARG*/
 
    // The interrupt is set when any request is valid and done
    assign irq = (transfer_valid & transfer_done) & {(table_entries){1'b1}};
-   
+
 endmodule // dma_transfer_table
 
 // Local Variables:
-// verilog-typedef-regexp:"_t$" 
+// verilog-typedef-regexp:"_t$"
 // End:

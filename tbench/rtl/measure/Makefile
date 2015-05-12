@@ -1,6 +1,6 @@
 all: build measure-vc
 
-build: 
+build:
 	@if [ ! -e work ]; then vlib work; fi
 	@vlog -f measure.vc
 

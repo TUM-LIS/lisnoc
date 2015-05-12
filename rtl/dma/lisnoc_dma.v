@@ -19,9 +19,9 @@
  * THE SOFTWARE.
  *
  * =============================================================================
- * 
+ *
  * This is the toplevel file of the DMA controller.
- * 
+ *
  * Author(s):
  *   Michael Tempelmeier <michael.tempelmeier@tum.de>
  *   Stefan Wallentowitz <stefan.wallentowitz@tum.de>
@@ -52,10 +52,10 @@ module lisnoc_dma(/*AUTOARG*/
    parameter noc_packet_size = 16;
 
    parameter generate_interrupt = 1;
-    
+
    input clk;
    input rst;
-   
+
    input [`FLIT_WIDTH-1:0] noc_in_req_flit;
    input                   noc_in_req_valid;
    output                  noc_in_req_ready;
@@ -63,7 +63,7 @@ module lisnoc_dma(/*AUTOARG*/
    input [`FLIT_WIDTH-1:0] noc_in_resp_flit;
    input                   noc_in_resp_valid;
    output                  noc_in_resp_ready;
-   
+
    output [`FLIT_WIDTH-1:0] noc_out_req_flit;
    output                   noc_out_req_valid;
    input                    noc_out_req_ready;
@@ -92,10 +92,10 @@ module lisnoc_dma(/*AUTOARG*/
    output reg [2:0]         wb_cti_o;
    output reg [1:0]         wb_bte_o;
    input [31:0]             wb_dat_i;
-   input                    wb_ack_i;   
+   input                    wb_ack_i;
 
-   output [table_entries-1:0] irq;                    
-   
+   output [table_entries-1:0] irq;
+
    assign wb_if_err_o = 1'b0;
    assign wb_if_rty_o = 1'b0;
 
@@ -109,7 +109,7 @@ module lisnoc_dma(/*AUTOARG*/
    wire [1:0]               wb_req_bte_o;
    reg [31:0]               wb_req_dat_i;
    reg                      wb_req_ack_i;
-   
+
    wire [31:0]              wb_resp_adr_o;
    wire [31:0]              wb_resp_dat_o;
    wire                     wb_resp_cyc_o;
@@ -133,27 +133,27 @@ module lisnoc_dma(/*AUTOARG*/
 
    /*AUTOWIRE*/
    // Beginning of automatic wires (for undeclared instantiated-module outputs)
-   wire			ctrl_done_en;		// From ctrl_initiator of lisnoc_dma_initiator.v
+   wire                 ctrl_done_en;           // From ctrl_initiator of lisnoc_dma_initiator.v
    wire [table_entries_ptrwidth-1:0] ctrl_done_pos;// From ctrl_initiator of lisnoc_dma_initiator.v
    wire [table_entries_ptrwidth-1:0] ctrl_read_pos;// From ctrl_initiator of lisnoc_dma_initiator.v
-   wire [`DMA_REQUEST_WIDTH-1:0] ctrl_read_req;	// From request_table of lisnoc_dma_request_table.v
-   wire [table_entries-1:0] done;		// From request_table of lisnoc_dma_request_table.v
-   wire			if_valid_en;		// From wbinterface of lisnoc_dma_wbinterface.v
+   wire [`DMA_REQUEST_WIDTH-1:0] ctrl_read_req; // From request_table of lisnoc_dma_request_table.v
+   wire [table_entries-1:0] done;               // From request_table of lisnoc_dma_request_table.v
+   wire                 if_valid_en;            // From wbinterface of lisnoc_dma_wbinterface.v
    wire [table_entries_ptrwidth-1:0] if_valid_pos;// From wbinterface of lisnoc_dma_wbinterface.v
-   wire			if_valid_set;		// From wbinterface of lisnoc_dma_wbinterface.v
-   wire			if_validrd_en;		// From wbinterface of lisnoc_dma_wbinterface.v
-   wire			if_write_en;		// From wbinterface of lisnoc_dma_wbinterface.v
+   wire                 if_valid_set;           // From wbinterface of lisnoc_dma_wbinterface.v
+   wire                 if_validrd_en;          // From wbinterface of lisnoc_dma_wbinterface.v
+   wire                 if_write_en;            // From wbinterface of lisnoc_dma_wbinterface.v
    wire [table_entries_ptrwidth-1:0] if_write_pos;// From wbinterface of lisnoc_dma_wbinterface.v
-   wire [`DMA_REQUEST_WIDTH-1:0] if_write_req;	// From wbinterface of lisnoc_dma_wbinterface.v
+   wire [`DMA_REQUEST_WIDTH-1:0] if_write_req;  // From wbinterface of lisnoc_dma_wbinterface.v
    wire [`DMA_REQMASK_WIDTH-1:0] if_write_select;// From wbinterface of lisnoc_dma_wbinterface.v
-   wire [table_entries-1:0] valid;		// From request_table of lisnoc_dma_request_table.v
-   wire [3:0]		wb_target_sel_o;	// From target of lisnoc_dma_target.v
+   wire [table_entries-1:0] valid;              // From request_table of lisnoc_dma_request_table.v
+   wire [3:0]           wb_target_sel_o;        // From target of lisnoc_dma_target.v
    // End of automatics
 
    wire [table_entries_ptrwidth-1:0] ctrl_out_read_pos;
    wire [table_entries_ptrwidth-1:0] ctrl_in_read_pos;
    wire [table_entries_ptrwidth-1:0] ctrl_write_pos;
-   
+
    assign ctrl_out_read_pos = 0;
    assign ctrl_in_read_pos = 0;
    assign ctrl_write_pos = 0;
@@ -161,49 +161,49 @@ module lisnoc_dma(/*AUTOARG*/
    lisnoc_dma_wbinterface
      #(.tileid(tileid))
    wbinterface(/*AUTOINST*/
-	       // Outputs
-	       .wb_if_dat_o		(wb_if_dat_o[31:0]),
-	       .wb_if_ack_o		(wb_if_ack_o),
-	       .if_write_req		(if_write_req[`DMA_REQUEST_WIDTH-1:0]),
-	       .if_write_pos		(if_write_pos[table_entries_ptrwidth-1:0]),
-	       .if_write_select		(if_write_select[`DMA_REQMASK_WIDTH-1:0]),
-	       .if_write_en		(if_write_en),
-	       .if_valid_pos		(if_valid_pos[table_entries_ptrwidth-1:0]),
-	       .if_valid_set		(if_valid_set),
-	       .if_valid_en		(if_valid_en),
-	       .if_validrd_en		(if_validrd_en),
-	       // Inputs
-	       .clk			(clk),
-	       .rst			(rst),
-	       .wb_if_adr_i		(wb_if_adr_i[31:0]),
-	       .wb_if_dat_i		(wb_if_dat_i[31:0]),
-	       .wb_if_cyc_i		(wb_if_cyc_i),
-	       .wb_if_stb_i		(wb_if_stb_i),
-	       .wb_if_we_i		(wb_if_we_i),
-	       .done			(done[table_entries-1:0]));
+               // Outputs
+               .wb_if_dat_o             (wb_if_dat_o[31:0]),
+               .wb_if_ack_o             (wb_if_ack_o),
+               .if_write_req            (if_write_req[`DMA_REQUEST_WIDTH-1:0]),
+               .if_write_pos            (if_write_pos[table_entries_ptrwidth-1:0]),
+               .if_write_select         (if_write_select[`DMA_REQMASK_WIDTH-1:0]),
+               .if_write_en             (if_write_en),
+               .if_valid_pos            (if_valid_pos[table_entries_ptrwidth-1:0]),
+               .if_valid_set            (if_valid_set),
+               .if_valid_en             (if_valid_en),
+               .if_validrd_en           (if_validrd_en),
+               // Inputs
+               .clk                     (clk),
+               .rst                     (rst),
+               .wb_if_adr_i             (wb_if_adr_i[31:0]),
+               .wb_if_dat_i             (wb_if_dat_i[31:0]),
+               .wb_if_cyc_i             (wb_if_cyc_i),
+               .wb_if_stb_i             (wb_if_stb_i),
+               .wb_if_we_i              (wb_if_we_i),
+               .done                    (done[table_entries-1:0]));
 
    lisnoc_dma_request_table
      #(.generate_interrupt(generate_interrupt))
    request_table(/*AUTOINST*/
-		 // Outputs
-		 .ctrl_read_req		(ctrl_read_req[`DMA_REQUEST_WIDTH-1:0]),
-		 .valid			(valid[table_entries-1:0]),
-		 .done			(done[table_entries-1:0]),
-		 .irq			(irq[table_entries-1:0]),
-		 // Inputs
-		 .clk			(clk),
-		 .rst			(rst),
-		 .if_write_req		(if_write_req[`DMA_REQUEST_WIDTH-1:0]),
-		 .if_write_pos		(if_write_pos[table_entries_ptrwidth-1:0]),
-		 .if_write_select	(if_write_select[`DMA_REQMASK_WIDTH-1:0]),
-		 .if_write_en		(if_write_en),
-		 .if_valid_pos		(if_valid_pos[table_entries_ptrwidth-1:0]),
-		 .if_valid_set		(if_valid_set),
-		 .if_valid_en		(if_valid_en),
-		 .if_validrd_en		(if_validrd_en),
-		 .ctrl_read_pos		(ctrl_read_pos[table_entries_ptrwidth-1:0]),
-		 .ctrl_done_pos		(ctrl_done_pos[table_entries_ptrwidth-1:0]),
-		 .ctrl_done_en		(ctrl_done_en));
+                 // Outputs
+                 .ctrl_read_req         (ctrl_read_req[`DMA_REQUEST_WIDTH-1:0]),
+                 .valid                 (valid[table_entries-1:0]),
+                 .done                  (done[table_entries-1:0]),
+                 .irq                   (irq[table_entries-1:0]),
+                 // Inputs
+                 .clk                   (clk),
+                 .rst                   (rst),
+                 .if_write_req          (if_write_req[`DMA_REQUEST_WIDTH-1:0]),
+                 .if_write_pos          (if_write_pos[table_entries_ptrwidth-1:0]),
+                 .if_write_select       (if_write_select[`DMA_REQMASK_WIDTH-1:0]),
+                 .if_write_en           (if_write_en),
+                 .if_valid_pos          (if_valid_pos[table_entries_ptrwidth-1:0]),
+                 .if_valid_set          (if_valid_set),
+                 .if_valid_en           (if_valid_en),
+                 .if_validrd_en         (if_validrd_en),
+                 .ctrl_read_pos         (ctrl_read_pos[table_entries_ptrwidth-1:0]),
+                 .ctrl_done_pos         (ctrl_done_pos[table_entries_ptrwidth-1:0]),
+                 .ctrl_done_en          (ctrl_done_en));
 
 
    /* lisnoc_dma_initiator AUTO_TEMPLATE(
@@ -213,42 +213,42 @@ module lisnoc_dma(/*AUTOARG*/
    lisnoc_dma_initiator
      #(.tileid(tileid))
    ctrl_initiator(/*AUTOINST*/
-		  // Outputs
-		  .ctrl_read_pos	(ctrl_read_pos[table_entries_ptrwidth-1:0]),
-		  .ctrl_done_pos	(ctrl_done_pos[table_entries_ptrwidth-1:0]),
-		  .ctrl_done_en		(ctrl_done_en),
-		  .noc_out_flit		(noc_out_req_flit[`FLIT_WIDTH-1:0]), // Templated
-		  .noc_out_valid	(noc_out_req_valid),	 // Templated
-		  .noc_in_ready		(noc_in_resp_ready),	 // Templated
-		  .wb_req_cyc_o		(wb_req_cyc_o),
-		  .wb_req_stb_o		(wb_req_stb_o),
-		  .wb_req_we_o		(wb_req_we_o),
-		  .wb_req_dat_o		(wb_req_dat_o[31:0]),
-		  .wb_req_adr_o		(wb_req_adr_o[31:0]),
-		  .wb_req_cti_o		(wb_req_cti_o[2:0]),
-		  .wb_req_bte_o		(wb_req_bte_o[1:0]),
-		  .wb_req_sel_o		(wb_req_sel_o[3:0]),
-		  .wb_resp_cyc_o	(wb_resp_cyc_o),
-		  .wb_resp_stb_o	(wb_resp_stb_o),
-		  .wb_resp_we_o		(wb_resp_we_o),
-		  .wb_resp_dat_o	(wb_resp_dat_o[31:0]),
-		  .wb_resp_adr_o	(wb_resp_adr_o[31:0]),
-		  .wb_resp_cti_o	(wb_resp_cti_o[2:0]),
-		  .wb_resp_bte_o	(wb_resp_bte_o[1:0]),
-		  .wb_resp_sel_o	(wb_resp_sel_o[3:0]),
-		  // Inputs
-		  .clk			(clk),
-		  .rst			(rst),
-		  .ctrl_read_req	(ctrl_read_req[`DMA_REQUEST_WIDTH-1:0]),
-		  .valid		(valid[table_entries-1:0]),
-		  .noc_out_ready	(noc_out_req_ready),	 // Templated
-		  .noc_in_flit		(noc_in_resp_flit[`FLIT_WIDTH-1:0]), // Templated
-		  .noc_in_valid		(noc_in_resp_valid),	 // Templated
-		  .wb_req_ack_i		(wb_req_ack_i),
-		  .wb_req_dat_i		(wb_req_dat_i[31:0]),
-		  .wb_resp_ack_i	(wb_resp_ack_i),
-		  .wb_resp_dat_i	(wb_resp_dat_i[31:0]));
-   
+                  // Outputs
+                  .ctrl_read_pos        (ctrl_read_pos[table_entries_ptrwidth-1:0]),
+                  .ctrl_done_pos        (ctrl_done_pos[table_entries_ptrwidth-1:0]),
+                  .ctrl_done_en         (ctrl_done_en),
+                  .noc_out_flit         (noc_out_req_flit[`FLIT_WIDTH-1:0]), // Templated
+                  .noc_out_valid        (noc_out_req_valid),     // Templated
+                  .noc_in_ready         (noc_in_resp_ready),     // Templated
+                  .wb_req_cyc_o         (wb_req_cyc_o),
+                  .wb_req_stb_o         (wb_req_stb_o),
+                  .wb_req_we_o          (wb_req_we_o),
+                  .wb_req_dat_o         (wb_req_dat_o[31:0]),
+                  .wb_req_adr_o         (wb_req_adr_o[31:0]),
+                  .wb_req_cti_o         (wb_req_cti_o[2:0]),
+                  .wb_req_bte_o         (wb_req_bte_o[1:0]),
+                  .wb_req_sel_o         (wb_req_sel_o[3:0]),
+                  .wb_resp_cyc_o        (wb_resp_cyc_o),
+                  .wb_resp_stb_o        (wb_resp_stb_o),
+                  .wb_resp_we_o         (wb_resp_we_o),
+                  .wb_resp_dat_o        (wb_resp_dat_o[31:0]),
+                  .wb_resp_adr_o        (wb_resp_adr_o[31:0]),
+                  .wb_resp_cti_o        (wb_resp_cti_o[2:0]),
+                  .wb_resp_bte_o        (wb_resp_bte_o[1:0]),
+                  .wb_resp_sel_o        (wb_resp_sel_o[3:0]),
+                  // Inputs
+                  .clk                  (clk),
+                  .rst                  (rst),
+                  .ctrl_read_req        (ctrl_read_req[`DMA_REQUEST_WIDTH-1:0]),
+                  .valid                (valid[table_entries-1:0]),
+                  .noc_out_ready        (noc_out_req_ready),     // Templated
+                  .noc_in_flit          (noc_in_resp_flit[`FLIT_WIDTH-1:0]), // Templated
+                  .noc_in_valid         (noc_in_resp_valid),     // Templated
+                  .wb_req_ack_i         (wb_req_ack_i),
+                  .wb_req_dat_i         (wb_req_dat_i[31:0]),
+                  .wb_resp_ack_i        (wb_resp_ack_i),
+                  .wb_resp_dat_i        (wb_resp_dat_i[31:0]));
+
    /* lisnoc_dma_target AUTO_TEMPLATE(
     .noc_out_\(.*\) (noc_out_resp_\1[]),
     .noc_in_\(.*\)  (noc_in_req_\1[]),
@@ -257,26 +257,26 @@ module lisnoc_dma(/*AUTOARG*/
    lisnoc_dma_target
      #(.tileid(tileid),.noc_packet_size(noc_packet_size))
    target(/*AUTOINST*/
-	  // Outputs
-	  .noc_out_flit			(noc_out_resp_flit[`FLIT_WIDTH-1:0]), // Templated
-	  .noc_out_valid		(noc_out_resp_valid),	 // Templated
-	  .noc_in_ready			(noc_in_req_ready),	 // Templated
-	  .wb_cyc_o			(wb_target_cyc_o),	 // Templated
-	  .wb_stb_o			(wb_target_stb_o),	 // Templated
-	  .wb_we_o			(wb_target_we_o),	 // Templated
-	  .wb_dat_o			(wb_target_dat_o[31:0]), // Templated
-	  .wb_adr_o			(wb_target_adr_o[31:0]), // Templated
-	  .wb_sel_o			(wb_target_sel_o[3:0]),	 // Templated
-	  .wb_cti_o			(wb_target_cti_o[2:0]),	 // Templated
-	  .wb_bte_o			(wb_target_bte_o[1:0]),	 // Templated
-	  // Inputs
-	  .clk				(clk),
-	  .rst				(rst),
-	  .noc_out_ready		(noc_out_resp_ready),	 // Templated
-	  .noc_in_flit			(noc_in_req_flit[`FLIT_WIDTH-1:0]), // Templated
-	  .noc_in_valid			(noc_in_req_valid),	 // Templated
-	  .wb_ack_i			(wb_target_ack_i),	 // Templated
-	  .wb_dat_i			(wb_target_dat_i[31:0])); // Templated
+          // Outputs
+          .noc_out_flit                 (noc_out_resp_flit[`FLIT_WIDTH-1:0]), // Templated
+          .noc_out_valid                (noc_out_resp_valid),    // Templated
+          .noc_in_ready                 (noc_in_req_ready),      // Templated
+          .wb_cyc_o                     (wb_target_cyc_o),       // Templated
+          .wb_stb_o                     (wb_target_stb_o),       // Templated
+          .wb_we_o                      (wb_target_we_o),        // Templated
+          .wb_dat_o                     (wb_target_dat_o[31:0]), // Templated
+          .wb_adr_o                     (wb_target_adr_o[31:0]), // Templated
+          .wb_sel_o                     (wb_target_sel_o[3:0]),  // Templated
+          .wb_cti_o                     (wb_target_cti_o[2:0]),  // Templated
+          .wb_bte_o                     (wb_target_bte_o[1:0]),  // Templated
+          // Inputs
+          .clk                          (clk),
+          .rst                          (rst),
+          .noc_out_ready                (noc_out_resp_ready),    // Templated
+          .noc_in_flit                  (noc_in_req_flit[`FLIT_WIDTH-1:0]), // Templated
+          .noc_in_valid                 (noc_in_req_valid),      // Templated
+          .wb_ack_i                     (wb_target_ack_i),       // Templated
+          .wb_dat_i                     (wb_target_dat_i[31:0])); // Templated
 
 
    localparam wb_arb_req = 2'b00, wb_arb_resp = 2'b01, wb_arb_target = 2'b10;
@@ -296,7 +296,7 @@ module lisnoc_dma(/*AUTOARG*/
    assign wb_arb_active = ((wb_arb == wb_arb_req) & wb_req_cyc_o) |
                           ((wb_arb == wb_arb_resp) & wb_resp_cyc_o) |
                           ((wb_arb == wb_arb_target) & wb_target_cyc_o);
-   
+
    always @(*) begin
       if (wb_arb_active) begin
          nxt_wb_arb = wb_arb;
@@ -368,7 +368,7 @@ module lisnoc_dma(/*AUTOARG*/
          wb_sel_o = 4'h0;
          wb_we_o = 1'b0;
          wb_bte_o = 2'b00;
-         wb_cti_o = 3'b000;      
+         wb_cti_o = 3'b000;
          wb_req_ack_i = 1'b0;
          wb_req_dat_i = 32'hx;
          wb_resp_ack_i = 1'b0;

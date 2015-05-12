@@ -8,7 +8,7 @@ class trafficdesc;
    string  name;
    string  param [];
 endclass // trafficdesc
-   
+
 /**
  * Singleton for configuration
  */
@@ -18,24 +18,24 @@ class sysconfig;
    integer nodes;
    integer vchannels;
    integer select_router;
-   
+
    integer    numPackets;
 
    // index 0: node id
    // index 1: traffic generator id
    trafficdesc traffic [][];
-   
+
    static sysconfig conf;
 
    local function new();
-   
+
    endfunction // new
 
    static function sysconfig get();
       if (conf==null) begin
          conf = new();
       end
-   
+
       get = conf;
    endfunction
 
@@ -75,9 +75,9 @@ class sysconfig;
       trafficdesc t = new ();
       int i = 0;
       int off;
-      
+
       string p;
-      
+
       for (i=0;i<s.len();i++) begin
          if (s.getc(i)=="(") begin
             t.name = s.substr(0,i-1);
@@ -102,34 +102,34 @@ class sysconfig;
       traffic[id] = new [traffic[id].size()+1](traffic[id]);
       traffic[id][traffic[id].size()-1] = t;
    endfunction // addTraffic
-   
-   
+
+
    function void setTraffic(string conf);
       string t [];
-      
+
       traffic = new [nodes];
-     
+
       explode(conf,";",t);
 
       for (int i=0;i<t.size();i++) begin
          string id,desc;
          if (explodefirst(t[i],":",id,desc)) begin
             trafficdesc traf = trafficextract(desc);
-            
+
             if (id=="*") begin
                for (int i=0;i<nodes;i++) begin
                   addTraffic(i,traf);
                end
             end else begin
                $display("%s\n",id);
-               
+
                addTraffic(id.atoi(),traf);
             end
          end else begin
             $display("invalid: %s\n",t[i]);
          end
       end
-      
+
    endfunction
 
    function int getTrafficNum(int node);
@@ -139,7 +139,7 @@ class sysconfig;
    function trafficdesc getTraffic(int node,int id);
       getTraffic = traffic[node][id];
    endfunction
-   
+
 endclass // sysconfig
 
 
