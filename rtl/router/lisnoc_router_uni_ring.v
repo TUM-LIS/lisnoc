@@ -69,21 +69,23 @@ module lisnoc_router_uni_ring( /*AUTOARG*/
    input [vchannels-1:0]    local_in_valid;
    output [vchannels-1:0]   local_in_ready;
 
-   lisnoc_router #(.vchannels(vchannels),.input_ports(ports),.output_ports(ports),
-         .lookup(lookup),.num_dests(num_dests), .flit_data_width(flit_data_width),
-         .flit_type_width(flit_type_width), .ph_dest_width(ph_dest_width),
-         .in_fifo_length(in_fifo_length), .out_fifo_length(out_fifo_length))
-     u_router(/*AUTOINST*/
-         // noc output interfaces
-         .out_flit         ({local_out_flit, ring_out_flit}), // Templated
-         .out_valid     ({local_out_valid, ring_out_valid}), // Templated
-         .out_ready         ({local_out_ready, ring_out_ready}), // Templated
-         // noc input interfaces
-         .clk        (clk),
-         .rst        (rst),
-         .in_ready     ({local_in_ready, ring_in_ready}), // Templated
-         .in_flit       ({local_in_flit, ring_in_flit}), // Templated
-         .in_valid         ({local_in_valid, ring_in_valid})); // Templated
+   lisnoc_router
+      #(.vchannels(vchannels),.input_ports(ports),.output_ports(ports),
+        .lookup(lookup),.num_dests(num_dests), .flit_data_width(flit_data_width),
+        .flit_type_width(flit_type_width), .ph_dest_width(ph_dest_width),
+        .in_fifo_length(in_fifo_length), .out_fifo_length(out_fifo_length))
+      u_router(.clk       (clk),
+               .rst       (rst),
+
+               // noc output interfaces
+               .out_flit  ({local_out_flit, ring_out_flit}),
+               .out_valid ({local_out_valid, ring_out_valid}),
+               .out_ready ({local_out_ready, ring_out_ready}),
+
+               // noc input interfaces
+               .in_ready  ({local_in_ready, ring_in_ready}),
+               .in_flit   ({local_in_flit, ring_in_flit}),
+               .in_valid  ({local_in_valid, ring_in_valid}));
 
 
 endmodule // lisnoc_router
