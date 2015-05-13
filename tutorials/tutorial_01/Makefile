@@ -1,4 +1,6 @@
 
+VERILATOR_INCLUDE ?= $(shell pkg-config --variable=includedir verilator)
+
 all: tutorial_01
 
 obj_dir/Vtutorial_01.mk: tutorial_01.v
