@@ -5,7 +5,7 @@ id: home
 ---
 
 LISNoC is a free Network-on-Chip implementation, mainly for academic
-or teaching purposes, but freely available for any use under the LGPL
+or teaching purposes, but freely available for any use under the MIT
 license. It is implemented in Verilog.
 
 It is a straight forward implementation with a strong focus on
