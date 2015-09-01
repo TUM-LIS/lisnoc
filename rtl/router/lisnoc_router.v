@@ -37,11 +37,10 @@ module lisnoc_router( /*AUTOARG*/
    clk, rst, out_ready, in_flit, in_valid
    );
 
-   // The lowercase parameters are legacy, replace any use by the
+   // FIXME The lowercase parameters are legacy, replace any use by the
    // uppercase variant!
    parameter  flit_data_width = 32;
    parameter  flit_type_width = 2;
-   localparam flit_width = flit_data_width+flit_type_width;
 
    parameter  num_dests = 32;
    parameter  ph_dest_width = 5;
@@ -60,9 +59,9 @@ module lisnoc_router( /*AUTOARG*/
    parameter [output_ports*num_dests-1:0] lookup = {num_dests*output_ports{1'b0}};
 
    // Width of the actual flit data
-   parameter  FLIT_DATA_WIDTH = 32;
+   parameter  FLIT_DATA_WIDTH = flit_data_width;
    // Type width, use 2 for the moment
-   parameter  FLIT_TYPE_WIDTH = 2;
+   parameter  FLIT_TYPE_WIDTH = flit_type_width;
    localparam FLIT_WIDTH = FLIT_DATA_WIDTH + FLIT_TYPE_WIDTH;
 
    // Number of destinations in the entire NoC
