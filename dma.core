@@ -7,13 +7,13 @@ depend = optimsoc:lisnoc:blocks
 file_type = verilogSource
 usage = sim synth
 files =
-  rtl/dma/lisnoc_dma.v
-  rtl/dma/lisnoc_dma_target.v
-  rtl/dma/lisnoc_dma_initiator.v
+  rtl/dma/lisnoc_dma.sv
+  rtl/dma/lisnoc_dma_target.sv
+  rtl/dma/lisnoc_dma_initiator.sv
   rtl/dma/lisnoc_dma_initiator_wbreq.v
-  rtl/dma/lisnoc_dma_initiator_nocreq.v
-  rtl/dma/lisnoc_dma_initiator_nocresp.v
-  rtl/dma/lisnoc_dma_request_table.v
+  rtl/dma/lisnoc_dma_initiator_nocreq.sv
+  rtl/dma/lisnoc_dma_initiator_nocresp.sv
+  rtl/dma/lisnoc_dma_request_table.sv
   rtl/dma/lisnoc_dma_wbinterface.v
 
 [fileset include_files]
